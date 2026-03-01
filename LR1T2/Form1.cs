@@ -1,4 +1,5 @@
 using System.Text;
+using System.IO;
 
 namespace LR1T2
 {
@@ -17,6 +18,7 @@ namespace LR1T2
         double[,] Matr3 = new double[MaxN, MaxM]; // матрица результатов
         bool f1; // флажок, который указывает о вводе данных в матрицу Matr1
         bool f2; // флажок, который указывает о вводе данных в матрицу Matr2
+        int lastRows = 0, lastCols = 0;
         int dx = 40, dy = 50; // ширина и высота ячейки в MatrText[,]
         Form2 form2 = null; // экземпляр (объект) класса формы Form2
 
@@ -278,35 +280,23 @@ namespace LR1T2
 
         private void Save_Button_Click(object sender, EventArgs e)
         {
-            FileStream fw = null;
-            string msg;
-            byte[] msgByte = null; // байтовый массив
-                                   // 1. Открыть файл для записи
-            fw = new FileStream("Res_Matr.txt", FileMode.Create);
-            // 2. Запись матрицы результата в файл
-
-            // 2.1. Сначала записать число элементов матрицы Matr3
-            msg = n.ToString() + "\r\n";
-            // перевод строки msg в байтовый массив msgByte
-            msgByte = Encoding.Default.GetBytes(msg);
-            // запись массива msgByte в файл
-            fw.Write(msgByte, 0, msgByte.Length);
-            // 2.2. Теперь записать саму матрицу
-            msg = "";
-            for (int i = 0; i < n; i++)
+            if (lastRows <= 0 || lastCols <= 0)
             {
-                // формируем строку msg из элементов матрицы
-                for (int j = 0; j < n; j++)
-                    msg += Matr3[i, j].ToString() + " ";
-                msg += "\r\n";
-                // добавить перевод строки
+                MessageBox.Show("Сначала получите результат, затем сохраняйте.", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
-            // 3. Перевод строки msg в байтовый массив msgByte
-            msgByte = Encoding.Default.GetBytes(msg);
-            // 4. запись строк матрицы в файл
-            fw.Write(msgByte, 0, msgByte.Length);
-            // 5. Закрыть файл
-            if (fw != null) fw.Close();
+
+            using (var sw = new StreamWriter("Res_Matr.txt", false, Encoding.UTF8))
+            {
+                sw.WriteLine($"{lastRows} {lastCols}");
+                for (int i = 0; i < lastRows; i++)
+                {
+                    for (int j = 0; j < lastCols; j++)
+                        sw.Write(Matr3[i, j].ToString() + " ");
+                    sw.WriteLine();
+                }
+            }
         }
 
         private void Sum_Button_Click(object sender, EventArgs e)
@@ -434,6 +424,9 @@ namespace LR1T2
 
         private void ShowResult(int rows, int cols, double[,] data)
         {
+            lastRows = rows;
+            lastCols = cols;
+
             Clear_MatrText();
 
             for (int i = 0; i < rows; i++)
