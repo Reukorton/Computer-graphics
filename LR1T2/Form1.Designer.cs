@@ -47,6 +47,8 @@
             label6 = new Label();
             Vector_TextBox = new TextBox();
             MatrixVectorMultiplication_Button = new Button();
+            Vector_artwork = new Button();
+            Transpose = new Button();
             SuspendLayout();
             // 
             // label1
@@ -240,11 +242,33 @@
             MatrixVectorMultiplication_Button.UseVisualStyleBackColor = true;
             MatrixVectorMultiplication_Button.Click += MatrixVectorMultiplication_Button_Click;
             // 
+            // Vector_artwork
+            // 
+            Vector_artwork.Location = new Point(12, 273);
+            Vector_artwork.Name = "Vector_artwork";
+            Vector_artwork.Size = new Size(264, 23);
+            Vector_artwork.TabIndex = 19;
+            Vector_artwork.Text = "Векторное произведение (a × b)";
+            Vector_artwork.UseVisualStyleBackColor = true;
+            Vector_artwork.Click += Vector_artwork_Click;
+            // 
+            // Transpose
+            // 
+            Transpose.Location = new Point(10, 302);
+            Transpose.Name = "Transpose";
+            Transpose.Size = new Size(266, 23);
+            Transpose.TabIndex = 20;
+            Transpose.Text = "Транспонирование (Aᵀ)";
+            Transpose.UseVisualStyleBackColor = true;
+            Transpose.Click += Transpose_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(288, 327);
+            ClientSize = new Size(288, 337);
+            Controls.Add(Transpose);
+            Controls.Add(Vector_artwork);
             Controls.Add(MatrixVectorMultiplication_Button);
             Controls.Add(label6);
             Controls.Add(Vector_TextBox);
@@ -293,5 +317,7 @@
         private Label label6;
         private TextBox Vector_TextBox;
         private Button MatrixVectorMultiplication_Button;
+        private Button Vector_artwork;
+        private Button Transpose;
     }
 }
