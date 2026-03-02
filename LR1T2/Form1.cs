@@ -1,5 +1,6 @@
-using System.Text;
 using System.IO;
+using System.Numerics;
+using System.Text;
 
 namespace LR1T2
 {
@@ -460,5 +461,65 @@ namespace LR1T2
 
             form2.ShowDialog();
         }
+
+        private void Vector_artwork_Click(object sender, EventArgs e)
+        {
+            // Нужно, чтобы оба были введены
+            if (!(f1 && f2))
+            {
+                MessageBox.Show("Сначала введите оба вектора (Матрица 1 и Матрица 2).",
+                                "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Нужно, чтобы оба были векторами (то есть один столбец)
+            if (cols1 != 1 || cols2 != 1)
+            {
+                MessageBox.Show("Векторное произведение возможно только для двух векторов (один столбец). " +
+                                "Поставьте галочки 'Матрица-вектор' для обеих.",
+                                "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Оба должны быть 3x1
+            if (rows1 != 3 || rows2 != 3)
+            {
+                MessageBox.Show("Векторное произведение делаем для 3D-векторов (размер vector = 3).",
+                                "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            double ax = Matr1[0, 0], ay = Matr1[1, 0], az = Matr1[2, 0];
+            double bx = Matr2[0, 0], by = Matr2[1, 0], bz = Matr2[2, 0];
+
+            // результат тоже 3x1
+            Matr3[0, 0] = ay * bz - az * by;
+            Matr3[1, 0] = az * bx - ax * bz;
+            Matr3[2, 0] = ax * by - ay * bx;
+
+            ShowResult(3, 1, Matr3);
+        }
+
+        private void Transpose_Click(object sender, EventArgs e)
+        {
+            if (!f1)
+            {
+                MessageBox.Show("Сначала введите матрицу 1.", "Ошибка",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Если Matr1 - вектор (cols1 == 1), транспонирование будет 1 x rows1
+            int resRows = cols1;
+            int resCols = rows1;
+                
+            for (int i = 0; i < rows1; i++)
+                for (int j = 0; j < cols1; j++)
+                    Matr3[j, i] = Matr1[i, j];
+
+            ShowResult(resRows, resCols, Matr3);
+        }
+        
     }
+    
 }
