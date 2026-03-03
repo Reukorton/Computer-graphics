@@ -59,12 +59,12 @@ namespace LR1T2
 
         private void AddMatrix1_Button_Click(object sender, EventArgs e)
         {
-            if (N_TextBox.Text == "")
+            if (N_TextBox.Text == "" && MatrixVector1_СheckBox.Checked == false)
             {
                 MessageBox.Show("Введите значение n", "Ошибка ввода", MessageBoxButtons.OK);
                 return;
             }
-            if (M_TextBox.Text == "")
+            if (M_TextBox.Text == "" && MatrixVector1_СheckBox.Checked == false)
             {
                 MessageBox.Show("Введите значение m", "Ошибка ввода", MessageBoxButtons.OK);
                 return;
@@ -134,12 +134,12 @@ namespace LR1T2
 
         private void AddMatrix2_Button_Click(object sender, EventArgs e)
         {
-            if (N_TextBox.Text == "")
+            if (N_TextBox.Text == "" && MatrixVector2_СheckBox.Checked == false)
             {
                 MessageBox.Show("Введите значение n", "Ошибка ввода", MessageBoxButtons.OK);
                 return;
             }
-            if (M_TextBox.Text == "")
+            if (M_TextBox.Text == "" && MatrixVector2_СheckBox.Checked == false)
             {
                 MessageBox.Show("Введите значение m", "Ошибка ввода", MessageBoxButtons.OK);
                 return;
@@ -462,7 +462,7 @@ namespace LR1T2
             form2.ShowDialog();
         }
 
-        private void Vector_artwork_Click(object sender, EventArgs e)
+        private void Vector_Artwork_Button_Click(object sender, EventArgs e)
         {
             // Нужно, чтобы оба были введены
             if (!(f1 && f2))
@@ -500,7 +500,7 @@ namespace LR1T2
             ShowResult(3, 1, Matr3);
         }
 
-        private void Transpose_Click(object sender, EventArgs e)
+        private void Transpose_Button_Click(object sender, EventArgs e)
         {
             if (!f1)
             {
@@ -520,7 +520,7 @@ namespace LR1T2
             ShowResult(resRows, resCols, Matr3);
         }
 
-        private void modul_vectora_Click(object sender, EventArgs e)
+        private void Vectore_Module_Button_Click(object sender, EventArgs e)
         {
             if (!f1 && !f2)
             {
@@ -589,7 +589,7 @@ namespace LR1T2
             form2.Text = originalTitle;
         }
 
-        private void Skal_proizvedenie_Click(object sender, EventArgs e)
+        private void Scalar_Product_Button_Click(object sender, EventArgs e)
         {
             if (!(f1 && f2))
             {

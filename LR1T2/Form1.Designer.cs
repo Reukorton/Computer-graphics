@@ -47,10 +47,10 @@
             label6 = new Label();
             Vector_TextBox = new TextBox();
             MatrixVectorMultiplication_Button = new Button();
-            Vector_artwork = new Button();
-            Transpose = new Button();
-            modul_vectora = new Button();
-            Skal_proizvedenie = new Button();
+            Vector_Artwork_Button = new Button();
+            Transpose_Button = new Button();
+            Vectore_Module_Button = new Button();
+            Scalar_Product_Button = new Button();
             SuspendLayout();
             // 
             // label1
@@ -244,55 +244,55 @@
             MatrixVectorMultiplication_Button.UseVisualStyleBackColor = true;
             MatrixVectorMultiplication_Button.Click += MatrixVectorMultiplication_Button_Click;
             // 
-            // Vector_artwork
+            // Vector_Artwork_Button
             // 
-            Vector_artwork.Location = new Point(12, 273);
-            Vector_artwork.Name = "Vector_artwork";
-            Vector_artwork.Size = new Size(264, 23);
-            Vector_artwork.TabIndex = 19;
-            Vector_artwork.Text = "Векторное произведение (a × b)";
-            Vector_artwork.UseVisualStyleBackColor = true;
-            Vector_artwork.Click += Vector_artwork_Click;
+            Vector_Artwork_Button.Location = new Point(10, 273);
+            Vector_Artwork_Button.Name = "Vector_Artwork_Button";
+            Vector_Artwork_Button.Size = new Size(266, 23);
+            Vector_Artwork_Button.TabIndex = 19;
+            Vector_Artwork_Button.Text = "Векторное произведение (a × b)";
+            Vector_Artwork_Button.UseVisualStyleBackColor = true;
+            Vector_Artwork_Button.Click += Vector_Artwork_Button_Click;
             // 
-            // Transpose
+            // Transpose_Button
             // 
-            Transpose.Location = new Point(10, 302);
-            Transpose.Name = "Transpose";
-            Transpose.Size = new Size(266, 23);
-            Transpose.TabIndex = 20;
-            Transpose.Text = "Транспонирование (Aᵀ)";
-            Transpose.UseVisualStyleBackColor = true;
-            Transpose.Click += Transpose_Click;
+            Transpose_Button.Location = new Point(10, 302);
+            Transpose_Button.Name = "Transpose_Button";
+            Transpose_Button.Size = new Size(266, 23);
+            Transpose_Button.TabIndex = 20;
+            Transpose_Button.Text = "Транспонирование (Aᵀ)";
+            Transpose_Button.UseVisualStyleBackColor = true;
+            Transpose_Button.Click += Transpose_Button_Click;
             // 
-            // modul_vectora
+            // Vectore_Module_Button
             // 
-            modul_vectora.Location = new Point(10, 333);
-            modul_vectora.Name = "modul_vectora";
-            modul_vectora.Size = new Size(262, 23);
-            modul_vectora.TabIndex = 21;
-            modul_vectora.Text = "Модуль вектора";
-            modul_vectora.UseVisualStyleBackColor = true;
-            modul_vectora.Click += modul_vectora_Click;
+            Vectore_Module_Button.Location = new Point(10, 333);
+            Vectore_Module_Button.Name = "Vectore_Module_Button";
+            Vectore_Module_Button.Size = new Size(266, 23);
+            Vectore_Module_Button.TabIndex = 21;
+            Vectore_Module_Button.Text = "Модуль вектора";
+            Vectore_Module_Button.UseVisualStyleBackColor = true;
+            Vectore_Module_Button.Click += Vectore_Module_Button_Click;
             // 
-            // Skal_proizvedenie
+            // Scalar_Product_Button
             // 
-            Skal_proizvedenie.Location = new Point(12, 362);
-            Skal_proizvedenie.Name = "Skal_proizvedenie";
-            Skal_proizvedenie.Size = new Size(260, 23);
-            Skal_proizvedenie.TabIndex = 22;
-            Skal_proizvedenie.Text = "Скалярное произведение векторов";
-            Skal_proizvedenie.UseVisualStyleBackColor = true;
-            Skal_proizvedenie.Click += Skal_proizvedenie_Click;
+            Scalar_Product_Button.Location = new Point(10, 362);
+            Scalar_Product_Button.Name = "Scalar_Product_Button";
+            Scalar_Product_Button.Size = new Size(266, 23);
+            Scalar_Product_Button.TabIndex = 22;
+            Scalar_Product_Button.Text = "Скалярное произведение векторов";
+            Scalar_Product_Button.UseVisualStyleBackColor = true;
+            Scalar_Product_Button.Click += Scalar_Product_Button_Click;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(284, 391);
-            Controls.Add(Skal_proizvedenie);
-            Controls.Add(modul_vectora);
-            Controls.Add(Transpose);
-            Controls.Add(Vector_artwork);
+            Controls.Add(Scalar_Product_Button);
+            Controls.Add(Vectore_Module_Button);
+            Controls.Add(Transpose_Button);
+            Controls.Add(Vector_Artwork_Button);
             Controls.Add(MatrixVectorMultiplication_Button);
             Controls.Add(label6);
             Controls.Add(Vector_TextBox);
@@ -341,9 +341,9 @@
         private Label label6;
         private TextBox Vector_TextBox;
         private Button MatrixVectorMultiplication_Button;
-        private Button Vector_artwork;
-        private Button Transpose;
-        private Button modul_vectora;
-        private Button Skal_proizvedenie;
+        private Button Vector_Artwork_Button;
+        private Button Transpose_Button;
+        private Button Vectore_Module_Button;
+        private Button Scalar_Product_Button;
     }
 }
