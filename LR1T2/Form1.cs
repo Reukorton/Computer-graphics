@@ -447,21 +447,6 @@ namespace LR1T2
             form2.ShowDialog();
         }
 
-        private void ShowScalar(double value)
-        {
-            Clear_MatrText();
-            MatrText[0, 0].Text = value.ToString("F3");
-            MatrText[0, 0].Visible = true;
-
-            form2.Width = 10 + 1 * dx + 20;
-            form2.Height = 10 + 1 * dy + form2.OK_Button.Height + 50;
-            form2.OK_Button.Left = 10;
-            form2.OK_Button.Top = 10 + 1 * dy + 10;
-            form2.OK_Button.Width = form2.Width - 30;
-
-            form2.ShowDialog();
-        }
-
         private void Vector_Artwork_Button_Click(object sender, EventArgs e)
         {
             // Нужно, чтобы оба были введены
@@ -564,6 +549,7 @@ namespace LR1T2
             // Показываем результат в виде скаляра
             ShowScalar(magnitude, $"Модуль вектора ({vectorName}) = {magnitude:F3}");
         }
+
         private void ShowScalar(double value, string title)
         {
             // Сохраняем оригинальный заголовок form2
@@ -587,6 +573,21 @@ namespace LR1T2
 
             // Возвращаем оригинальный заголовок
             form2.Text = originalTitle;
+        }
+
+        private void ShowScalar(double value)
+        {
+            Clear_MatrText();
+            MatrText[0, 0].Text = value.ToString("F3");
+            MatrText[0, 0].Visible = true;
+
+            form2.Width = 10 + 1 * dx + 20;
+            form2.Height = 10 + 1 * dy + form2.OK_Button.Height + 50;
+            form2.OK_Button.Left = 10;
+            form2.OK_Button.Top = 10 + 1 * dy + 10;
+            form2.OK_Button.Width = form2.Width - 30;
+
+            form2.ShowDialog();
         }
 
         private void Scalar_Product_Button_Click(object sender, EventArgs e)
