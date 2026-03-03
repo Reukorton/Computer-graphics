@@ -49,6 +49,8 @@
             MatrixVectorMultiplication_Button = new Button();
             Vector_artwork = new Button();
             Transpose = new Button();
+            modul_vectora = new Button();
+            Skal_proizvedenie = new Button();
             SuspendLayout();
             // 
             // label1
@@ -262,11 +264,33 @@
             Transpose.UseVisualStyleBackColor = true;
             Transpose.Click += Transpose_Click;
             // 
+            // modul_vectora
+            // 
+            modul_vectora.Location = new Point(10, 333);
+            modul_vectora.Name = "modul_vectora";
+            modul_vectora.Size = new Size(262, 23);
+            modul_vectora.TabIndex = 21;
+            modul_vectora.Text = "Модуль вектора";
+            modul_vectora.UseVisualStyleBackColor = true;
+            modul_vectora.Click += modul_vectora_Click;
+            // 
+            // Skal_proizvedenie
+            // 
+            Skal_proizvedenie.Location = new Point(12, 362);
+            Skal_proizvedenie.Name = "Skal_proizvedenie";
+            Skal_proizvedenie.Size = new Size(260, 23);
+            Skal_proizvedenie.TabIndex = 22;
+            Skal_proizvedenie.Text = "Скалярное произведение векторов";
+            Skal_proizvedenie.UseVisualStyleBackColor = true;
+            Skal_proizvedenie.Click += Skal_proizvedenie_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(288, 337);
+            ClientSize = new Size(284, 391);
+            Controls.Add(Skal_proizvedenie);
+            Controls.Add(modul_vectora);
             Controls.Add(Transpose);
             Controls.Add(Vector_artwork);
             Controls.Add(MatrixVectorMultiplication_Button);
@@ -319,5 +343,7 @@
         private Button MatrixVectorMultiplication_Button;
         private Button Vector_artwork;
         private Button Transpose;
+        private Button modul_vectora;
+        private Button Skal_proizvedenie;
     }
 }
