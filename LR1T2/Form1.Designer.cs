@@ -51,6 +51,7 @@
             Transpose_Button = new Button();
             Vectore_Module_Button = new Button();
             Scalar_Product_Button = new Button();
+            MultiplicationMatrixByConst_Button = new Button();
             SuspendLayout();
             // 
             // label1
@@ -284,11 +285,22 @@
             Scalar_Product_Button.UseVisualStyleBackColor = true;
             Scalar_Product_Button.Click += Scalar_Product_Button_Click;
             // 
+            // MultiplicationMatrixByConst_Button
+            // 
+            MultiplicationMatrixByConst_Button.Location = new Point(12, 391);
+            MultiplicationMatrixByConst_Button.Name = "MultiplicationMatrixByConst_Button";
+            MultiplicationMatrixByConst_Button.Size = new Size(264, 23);
+            MultiplicationMatrixByConst_Button.TabIndex = 23;
+            MultiplicationMatrixByConst_Button.Text = " Умножение матрицы на константу";
+            MultiplicationMatrixByConst_Button.UseVisualStyleBackColor = true;
+            MultiplicationMatrixByConst_Button.Click += MultiplicationMatrixByConst_Button_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(284, 391);
+            ClientSize = new Size(277, 426);
+            Controls.Add(MultiplicationMatrixByConst_Button);
             Controls.Add(Scalar_Product_Button);
             Controls.Add(Vectore_Module_Button);
             Controls.Add(Transpose_Button);
@@ -345,5 +357,6 @@
         private Button Transpose_Button;
         private Button Vectore_Module_Button;
         private Button Scalar_Product_Button;
+        private Button MultiplicationMatrixByConst_Button;
     }
 }

@@ -447,21 +447,6 @@ namespace LR1T2
             form2.ShowDialog();
         }
 
-        private void ShowScalar(double value)
-        {
-            Clear_MatrText();
-            MatrText[0, 0].Text = value.ToString("F3");
-            MatrText[0, 0].Visible = true;
-
-            form2.Width = 10 + 1 * dx + 20;
-            form2.Height = 10 + 1 * dy + form2.OK_Button.Height + 50;
-            form2.OK_Button.Left = 10;
-            form2.OK_Button.Top = 10 + 1 * dy + 10;
-            form2.OK_Button.Width = form2.Width - 30;
-
-            form2.ShowDialog();
-        }
-
         private void Vector_Artwork_Button_Click(object sender, EventArgs e)
         {
             // Нужно, чтобы оба были введены
@@ -564,6 +549,7 @@ namespace LR1T2
             // Показываем результат в виде скаляра
             ShowScalar(magnitude, $"Модуль вектора ({vectorName}) = {magnitude:F3}");
         }
+
         private void ShowScalar(double value, string title)
         {
             // Сохраняем оригинальный заголовок form2
@@ -587,6 +573,21 @@ namespace LR1T2
 
             // Возвращаем оригинальный заголовок
             form2.Text = originalTitle;
+        }
+
+        private void ShowScalar(double value)
+        {
+            Clear_MatrText();
+            MatrText[0, 0].Text = value.ToString("F3");
+            MatrText[0, 0].Visible = true;
+
+            form2.Width = 10 + 1 * dx + 20;
+            form2.Height = 10 + 1 * dy + form2.OK_Button.Height + 50;
+            form2.OK_Button.Left = 10;
+            form2.OK_Button.Top = 10 + 1 * dy + 10;
+            form2.OK_Button.Width = form2.Width - 30;
+
+            form2.ShowDialog();
         }
 
         private void Scalar_Product_Button_Click(object sender, EventArgs e)
@@ -627,6 +628,51 @@ namespace LR1T2
             // Показываем результат
             ShowScalar(dotProduct, $"Скалярное произведение = {dotProduct:F3}");
         }
-    
+
+        private void MultiplicationMatrixByConst_Button_Click(object sender, EventArgs e)
+        {
+            // Проверяем, введена ли матрица 1
+            if (!f1)
+            {
+                MessageBox.Show("Сначала введите матрицу 1.",
+                                "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Проверяем, введена ли константа
+            if (string.IsNullOrWhiteSpace(Const_TextBox.Text))
+            {
+                MessageBox.Show("Введите константу в поле const =.",
+                                "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Парсим константу
+            double constant;
+            if (!double.TryParse(Const_TextBox.Text, System.Globalization.NumberStyles.Any,
+                                System.Globalization.CultureInfo.InvariantCulture, out constant))
+            {
+                MessageBox.Show("Введите корректное число (разделитель - точка).",
+                                "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Умножаем матрицу 1 на константу
+            for (int i = 0; i < rows1; i++)
+                for (int j = 0; j < cols1; j++)
+                    Matr3[i, j] = Matr1[i, j] * constant;
+
+            // Сохраняем оригинальный заголовок form2
+            string originalTitle = form2.Text;
+
+            // Устанавливаем информативный заголовок
+            form2.Text = $"Результат умножения на {constant:F3}";
+
+            // Выводим результат
+            ShowResult(rows1, cols1, Matr3);
+
+            // Возвращаем оригинальный заголовок
+            form2.Text = originalTitle;
+        }
     }
 }
