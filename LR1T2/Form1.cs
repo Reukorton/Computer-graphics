@@ -59,12 +59,12 @@ namespace LR1T2
 
         private void AddMatrix1_Button_Click(object sender, EventArgs e)
         {
-            if (N_TextBox.Text == "")
+            if (N_TextBox.Text == "" && MatrixVector1_СheckBox.Checked == false)
             {
                 MessageBox.Show("Введите значение n", "Ошибка ввода", MessageBoxButtons.OK);
                 return;
             }
-            if (M_TextBox.Text == "")
+            if (M_TextBox.Text == "" && MatrixVector1_СheckBox.Checked == false)
             {
                 MessageBox.Show("Введите значение m", "Ошибка ввода", MessageBoxButtons.OK);
                 return;
@@ -134,12 +134,12 @@ namespace LR1T2
 
         private void AddMatrix2_Button_Click(object sender, EventArgs e)
         {
-            if (N_TextBox.Text == "")
+            if (N_TextBox.Text == "" && MatrixVector2_СheckBox.Checked == false)
             {
                 MessageBox.Show("Введите значение n", "Ошибка ввода", MessageBoxButtons.OK);
                 return;
             }
-            if (M_TextBox.Text == "")
+            if (M_TextBox.Text == "" && MatrixVector2_СheckBox.Checked == false)
             {
                 MessageBox.Show("Введите значение m", "Ошибка ввода", MessageBoxButtons.OK);
                 return;
@@ -462,7 +462,7 @@ namespace LR1T2
             form2.ShowDialog();
         }
 
-        private void Vector_artwork_Click(object sender, EventArgs e)
+        private void Vector_Artwork_Button_Click(object sender, EventArgs e)
         {
             // Нужно, чтобы оба были введены
             if (!(f1 && f2))
@@ -500,7 +500,7 @@ namespace LR1T2
             ShowResult(3, 1, Matr3);
         }
 
-        private void Transpose_Click(object sender, EventArgs e)
+        private void Transpose_Button_Click(object sender, EventArgs e)
         {
             if (!f1)
             {
@@ -512,14 +512,121 @@ namespace LR1T2
             // Если Matr1 - вектор (cols1 == 1), транспонирование будет 1 x rows1
             int resRows = cols1;
             int resCols = rows1;
-                
+
             for (int i = 0; i < rows1; i++)
                 for (int j = 0; j < cols1; j++)
                     Matr3[j, i] = Matr1[i, j];
 
             ShowResult(resRows, resCols, Matr3);
         }
-        
-    }
+
+        private void Vectore_Module_Button_Click(object sender, EventArgs e)
+        {
+            if (!f1 && !f2)
+            {
+                MessageBox.Show("Сначала введите хотя бы один вектор.",
+                                "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Выбираем, с каким вектором работать
+            double[,] vector;
+            int vecRows;
+            string vectorName;
+
+            if (f1 && cols1 == 1)
+            {
+                vector = Matr1;
+                vecRows = rows1;
+                vectorName = "Матрица 1";
+            }
+            else if (f2 && cols2 == 1)
+            {
+                vector = Matr2;
+                vecRows = rows2;
+                vectorName = "Матрица 2";
+            }
+            else
+            {
+                MessageBox.Show("Выберите вектор (установите галочку 'Матрица-вектор' для одной из матриц).",
+                                "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Вычисляем модуль (длину) вектора
+            double sumSquares = 0;
+            for (int i = 0; i < vecRows; i++)
+            {
+                sumSquares += vector[i, 0] * vector[i, 0];
+            }
+            double magnitude = Math.Sqrt(sumSquares);
+
+            // Показываем результат в виде скаляра
+            ShowScalar(magnitude, $"Модуль вектора ({vectorName}) = {magnitude:F3}");
+        }
+        private void ShowScalar(double value, string title)
+        {
+            // Сохраняем оригинальный заголовок form2
+            string originalTitle = form2.Text;
+
+            // Устанавливаем новый заголовок
+            form2.Text = title;
+
+            // Показываем результат
+            Clear_MatrText();
+            MatrText[0, 0].Text = value.ToString("F3");
+            MatrText[0, 0].Visible = true;
+
+            form2.Width = 10 + 1 * dx + 20;
+            form2.Height = 10 + 1 * dy + form2.OK_Button.Height + 50;
+            form2.OK_Button.Left = 10;
+            form2.OK_Button.Top = 10 + 1 * dy + 10;
+            form2.OK_Button.Width = form2.Width - 30;
+
+            form2.ShowDialog();
+
+            // Возвращаем оригинальный заголовок
+            form2.Text = originalTitle;
+        }
+
+        private void Scalar_Product_Button_Click(object sender, EventArgs e)
+        {
+            if (!(f1 && f2))
+            {
+                MessageBox.Show("Сначала введите оба вектора (Матрица 1 и Матрица 2).",
+                                "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Проверяем, что оба являются векторами (один столбец)
+            if (cols1 != 1 || cols2 != 1)
+            {
+                MessageBox.Show("Скалярное произведение возможно только для двух векторов (один столбец).\n" +
+                                "Поставьте галочки 'Матрица-вектор' для обеих матриц.",
+                                "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Проверяем одинаковую размерность векторов
+            if (rows1 != rows2)
+            {
+                MessageBox.Show($"Векторы должны быть одинаковой размерности!\n" +
+                                $"Размерность вектора 1: {rows1}\n" +
+                                $"Размерность вектора 2: {rows2}",
+                                "Ошибка размерности", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Вычисляем скалярное произведение
+            double dotProduct = 0;
+            for (int i = 0; i < rows1; i++)
+            {
+                dotProduct += Matr1[i, 0] * Matr2[i, 0];
+            }
+
+            // Показываем результат
+            ShowScalar(dotProduct, $"Скалярное произведение = {dotProduct:F3}");
+        }
     
+    }
 }
