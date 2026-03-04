@@ -547,32 +547,7 @@ namespace LR1T2
             double magnitude = Math.Sqrt(sumSquares);
 
             // Показываем результат в виде скаляра
-            ShowScalar(magnitude, $"Модуль вектора ({vectorName}) = {magnitude:F3}");
-        }
-
-        private void ShowScalar(double value, string title)
-        {
-            // Сохраняем оригинальный заголовок form2
-            string originalTitle = form2.Text;
-
-            // Устанавливаем новый заголовок
-            form2.Text = title;
-
-            // Показываем результат
-            Clear_MatrText();
-            MatrText[0, 0].Text = value.ToString("F3");
-            MatrText[0, 0].Visible = true;
-
-            form2.Width = 10 + 1 * dx + 20;
-            form2.Height = 10 + 1 * dy + form2.OK_Button.Height + 50;
-            form2.OK_Button.Left = 10;
-            form2.OK_Button.Top = 10 + 1 * dy + 10;
-            form2.OK_Button.Width = form2.Width - 30;
-
-            form2.ShowDialog();
-
-            // Возвращаем оригинальный заголовок
-            form2.Text = originalTitle;
+            ShowScalar(magnitude);
         }
 
         private void ShowScalar(double value)
@@ -626,7 +601,7 @@ namespace LR1T2
             }
 
             // Показываем результат
-            ShowScalar(dotProduct, $"Скалярное произведение = {dotProduct:F3}");
+            ShowScalar(dotProduct);
         }
 
         private void MultiplicationMatrixByConst_Button_Click(object sender, EventArgs e)
@@ -649,8 +624,11 @@ namespace LR1T2
 
             // Парсим константу
             double constant;
-            if (!double.TryParse(Const_TextBox.Text, System.Globalization.NumberStyles.Any,
-                                System.Globalization.CultureInfo.InvariantCulture, out constant))
+            try
+            {
+                constant = double.Parse(Const_TextBox.Text);
+            }
+            catch
             {
                 MessageBox.Show("Введите корректное число (разделитель - точка).",
                                 "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -662,17 +640,8 @@ namespace LR1T2
                 for (int j = 0; j < cols1; j++)
                     Matr3[i, j] = Matr1[i, j] * constant;
 
-            // Сохраняем оригинальный заголовок form2
-            string originalTitle = form2.Text;
-
-            // Устанавливаем информативный заголовок
-            form2.Text = $"Результат умножения на {constant:F3}";
-
             // Выводим результат
             ShowResult(rows1, cols1, Matr3);
-
-            // Возвращаем оригинальный заголовок
-            form2.Text = originalTitle;
         }
     }
 }
