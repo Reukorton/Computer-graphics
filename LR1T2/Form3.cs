@@ -56,7 +56,7 @@ namespace LR1T2
             for (index = 1; index <= numberNodes; index++)
             {
                 // Рисуем прямоугольник для каждого пикселя
-                g.DrawRectangle(new Pen(Color.Red, 1), (int)xOutput, (int)yOutput, 2, 2);
+                g.DrawRectangle(new Pen(currentBorderColor, 1), (int)xOutput, (int)yOutput, 2, 2);
 
                 // Переходим к следующей точке
                 xOutput = xOutput + dx / numberNodes;
