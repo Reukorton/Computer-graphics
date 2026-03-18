@@ -37,6 +37,7 @@
             radioButton1 = new RadioButton();
             pictureBox1 = new PictureBox();
             colorDialog1 = new ColorDialog();
+            buttonToggleLine = new Button();
             panel1.SuspendLayout();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -45,6 +46,7 @@
             // panel1
             // 
             panel1.BorderStyle = BorderStyle.FixedSingle;
+            panel1.Controls.Add(buttonToggleLine);
             panel1.Controls.Add(button3);
             panel1.Controls.Add(button2);
             panel1.Controls.Add(button1);
@@ -127,6 +129,15 @@
             pictureBox1.MouseDown += pictureBox1_MouseDown;
             pictureBox1.MouseUp += pictureBox1_MouseUp;
             // 
+            // buttonToggleLine
+            // 
+            buttonToggleLine.Location = new Point(16, 350);
+            buttonToggleLine.Name = "buttonToggleLine";
+            buttonToggleLine.Size = new Size(174, 24);
+            buttonToggleLine.TabIndex = 4;
+            buttonToggleLine.Text = "Изменить толщину линии";
+            buttonToggleLine.UseVisualStyleBackColor = true;
+            // 
             // Form3
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -154,5 +165,6 @@
         private RadioButton radioButton2;
         private Button button3;
         private ColorDialog colorDialog1;
+        private Button buttonToggleLine;
     }
 }
