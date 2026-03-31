@@ -55,6 +55,7 @@
             Filling_RadioButton = new RadioButton();
             CDA_RadioButton = new RadioButton();
             colorDialog1 = new ColorDialog();
+            SimpleCutting_RadioButton = new RadioButton();
             ((System.ComponentModel.ISupportInitialize)PictureBox).BeginInit();
             panel1.SuspendLayout();
             groupBox3.SuspendLayout();
@@ -102,9 +103,9 @@
             groupBox3.Controls.Add(label6);
             groupBox3.Controls.Add(label5);
             groupBox3.Controls.Add(label4);
-            groupBox3.Location = new Point(13, 209);
+            groupBox3.Location = new Point(3, 238);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new Size(214, 125);
+            groupBox3.Size = new Size(228, 125);
             groupBox3.TabIndex = 6;
             groupBox3.TabStop = false;
             groupBox3.Text = "Рисование отрезка";
@@ -189,9 +190,9 @@
             groupBox2.Controls.Add(label2);
             groupBox2.Controls.Add(comboBoxLineType);
             groupBox2.Controls.Add(label1);
-            groupBox2.Location = new Point(9, 132);
+            groupBox2.Location = new Point(3, 161);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(218, 71);
+            groupBox2.Size = new Size(224, 71);
             groupBox2.TabIndex = 5;
             groupBox2.TabStop = false;
             groupBox2.Text = "Настройка линии";
@@ -229,16 +230,16 @@
             label1.AutoSize = true;
             label1.Location = new Point(7, 19);
             label1.Name = "label1";
-            label1.Size = new Size(65, 15);
+            label1.Size = new Size(66, 15);
             label1.TabIndex = 0;
             label1.Text = "Тип линии";
             // 
             // ThickLine_СheckBox
             // 
             ThickLine_СheckBox.AutoSize = true;
-            ThickLine_СheckBox.Location = new Point(107, 369);
+            ThickLine_СheckBox.Location = new Point(113, 372);
             ThickLine_СheckBox.Name = "ThickLine_СheckBox";
-            ThickLine_СheckBox.Size = new Size(106, 19);
+            ThickLine_СheckBox.Size = new Size(107, 19);
             ThickLine_СheckBox.TabIndex = 4;
             ThickLine_СheckBox.Text = "Толстая линия";
             ThickLine_СheckBox.UseVisualStyleBackColor = true;
@@ -278,13 +279,14 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(SimpleCutting_RadioButton);
             groupBox1.Controls.Add(radioButtonBresenham);
             groupBox1.Controls.Add(Contour_RadioButton);
             groupBox1.Controls.Add(Filling_RadioButton);
             groupBox1.Controls.Add(CDA_RadioButton);
             groupBox1.Location = new Point(3, 12);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(228, 114);
+            groupBox1.Size = new Size(228, 143);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             groupBox1.Text = "Выберите алгоритм";
@@ -294,7 +296,7 @@
             radioButtonBresenham.AutoSize = true;
             radioButtonBresenham.Location = new Point(6, 95);
             radioButtonBresenham.Name = "radioButtonBresenham";
-            radioButtonBresenham.Size = new Size(148, 19);
+            radioButtonBresenham.Size = new Size(147, 19);
             radioButtonBresenham.TabIndex = 3;
             radioButtonBresenham.TabStop = true;
             radioButtonBresenham.Text = "Алгоритм Брезенхема";
@@ -306,7 +308,7 @@
             Contour_RadioButton.AutoSize = true;
             Contour_RadioButton.Location = new Point(6, 72);
             Contour_RadioButton.Name = "Contour_RadioButton";
-            Contour_RadioButton.Size = new Size(165, 19);
+            Contour_RadioButton.Size = new Size(164, 19);
             Contour_RadioButton.TabIndex = 2;
             Contour_RadioButton.TabStop = true;
             Contour_RadioButton.Text = "Обход сложного контура";
@@ -333,6 +335,17 @@
             CDA_RadioButton.TabStop = true;
             CDA_RadioButton.Text = "Обычный ЦДА";
             CDA_RadioButton.UseVisualStyleBackColor = true;
+            // 
+            // SimpleCutting_RadioButton
+            // 
+            SimpleCutting_RadioButton.AutoSize = true;
+            SimpleCutting_RadioButton.Location = new Point(6, 118);
+            SimpleCutting_RadioButton.Name = "SimpleCutting_RadioButton";
+            SimpleCutting_RadioButton.Size = new Size(151, 19);
+            SimpleCutting_RadioButton.TabIndex = 4;
+            SimpleCutting_RadioButton.TabStop = true;
+            SimpleCutting_RadioButton.Text = "Простое 2D-отсечение";
+            SimpleCutting_RadioButton.UseVisualStyleBackColor = true;
             // 
             // Form3
             // 
@@ -385,5 +398,6 @@
         private Label label5;
         private Label label4;
         private RadioButton radioButtonBresenham;
+        private RadioButton SimpleCutting_RadioButton;
     }
 }
