@@ -17,6 +17,7 @@ namespace LR1T2
         Bitmap myBitmap;
         Color currentBorderColor = Color.Red;
         Color currentFillColor = Color.Green;
+        Color contourTraceColor = Color.Blue;
 
         public Form3()
         {
@@ -164,7 +165,7 @@ namespace LR1T2
         }
 
 
-        private void Make_Button_Click(object sender, EventArgs e)
+        private async void Make_Button_Click(object sender, EventArgs e)
         {
             if (CDA_RadioButton.Checked)
             {
@@ -200,6 +201,18 @@ namespace LR1T2
                 PictureBox.Image = myBitmap;
                 PictureBox.Refresh();
             }
+            else if (Contour_RadioButton.Checked)
+            {
+                myBitmap = PictureBox.Image as Bitmap;
+
+                if (myBitmap == null)
+                {
+                    MessageBox.Show("Сначала нужно построить контур.");
+                    return;
+                }
+
+                await TraceComplexContour();
+            }
         }
 
         private void DrawPixel(int x, int y, Color color)
@@ -220,6 +233,103 @@ namespace LR1T2
                 for (int dy = -1; dy <= 1; dy++)
                 {
                     DrawPixel(x + dx, y + dy, color);
+                }
+            }
+        }
+
+        private bool IsContourPixel(int x, int y)
+        {
+            if (myBitmap == null) return false;
+
+            if (x < 0 || x >= myBitmap.Width || y < 0 || y >= myBitmap.Height)
+                return false;
+
+            return myBitmap.GetPixel(x, y).ToArgb() == currentBorderColor.ToArgb();
+        }
+
+        private Point FindFirstContourPixel()
+        {
+            for (int y = 0; y < myBitmap.Height; y++)
+            {
+                for (int x = 0; x < myBitmap.Width; x++)
+                {
+                    if (IsContourPixel(x, y))
+                        return new Point(x, y);
+                }
+            }
+
+            return new Point(-1, -1);
+        }
+
+        private List<Point> GetNeighbors(int x, int y, bool[,] visited)
+        {
+            List<Point> neighbors = new List<Point>();
+
+            for (int dy = -1; dy <= 1; dy++)
+            {
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    if (dx == 0 && dy == 0)
+                        continue;
+
+                    int nx = x + dx;
+                    int ny = y + dy;
+
+                    if (nx >= 0 && nx < myBitmap.Width &&
+                        ny >= 0 && ny < myBitmap.Height &&
+                        !visited[nx, ny] &&
+                        IsContourPixel(nx, ny))
+                    {
+                        neighbors.Add(new Point(nx, ny));
+                    }
+                }
+            }
+
+            return neighbors;
+        }
+
+        private async Task TraceComplexContour()
+        {
+            if (myBitmap == null)
+            {
+                MessageBox.Show("Сначала нарисуйте контур.");
+                return;
+            }
+
+            Point start = FindFirstContourPixel();
+
+            if (start.X == -1)
+            {
+                MessageBox.Show("Контур не найден.");
+                return;
+            }
+
+            bool[,] visited = new bool[myBitmap.Width, myBitmap.Height];
+            Stack<Point> stack = new Stack<Point>();
+
+            stack.Push(start);
+
+            while (stack.Count > 0)
+            {
+                Point p = stack.Pop();
+
+                if (visited[p.X, p.Y])
+                    continue;
+
+                visited[p.X, p.Y] = true;
+
+                myBitmap.SetPixel(p.X, p.Y, contourTraceColor);
+
+                PictureBox.Image = myBitmap;
+                PictureBox.Refresh();
+
+                await Task.Delay(10);
+
+                List<Point> neighbors = GetNeighbors(p.X, p.Y, visited);
+
+                for (int i = 0; i < neighbors.Count; i++)
+                {
+                    stack.Push(neighbors[i]);
                 }
             }
         }
