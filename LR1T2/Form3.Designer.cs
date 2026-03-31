@@ -30,6 +30,7 @@
         {
             PictureBox = new PictureBox();
             panel1 = new Panel();
+            ThickLine_СheckBox = new CheckBox();
             ColorSelection_Button = new Button();
             Make_Button = new Button();
             Clear_Button = new Button();
@@ -37,7 +38,7 @@
             Filling_RadioButton = new RadioButton();
             CDA_RadioButton = new RadioButton();
             colorDialog1 = new ColorDialog();
-            ThickLine_СheckBox = new CheckBox();
+            Contour_RadioButton = new RadioButton();
             ((System.ComponentModel.ISupportInitialize)PictureBox).BeginInit();
             panel1.SuspendLayout();
             groupBox1.SuspendLayout();
@@ -68,6 +69,16 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(232, 426);
             panel1.TabIndex = 1;
+            // 
+            // ThickLine_СheckBox
+            // 
+            ThickLine_СheckBox.AutoSize = true;
+            ThickLine_СheckBox.Location = new Point(3, 344);
+            ThickLine_СheckBox.Name = "ThickLine_СheckBox";
+            ThickLine_СheckBox.Size = new Size(107, 19);
+            ThickLine_СheckBox.TabIndex = 4;
+            ThickLine_СheckBox.Text = "Толстая линия";
+            ThickLine_СheckBox.UseVisualStyleBackColor = true;
             // 
             // ColorSelection_Button
             // 
@@ -104,11 +115,12 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(Contour_RadioButton);
             groupBox1.Controls.Add(Filling_RadioButton);
             groupBox1.Controls.Add(CDA_RadioButton);
             groupBox1.Location = new Point(3, 12);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(228, 72);
+            groupBox1.Size = new Size(228, 100);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             groupBox1.Text = "Выберите алгоритм";
@@ -135,15 +147,16 @@
             CDA_RadioButton.Text = "Обычный ЦДА";
             CDA_RadioButton.UseVisualStyleBackColor = true;
             // 
-            // ThickLine_СheckBox
+            // Contour_RadioButton
             // 
-            ThickLine_СheckBox.AutoSize = true;
-            ThickLine_СheckBox.Location = new Point(3, 344);
-            ThickLine_СheckBox.Name = "ThickLine_СheckBox";
-            ThickLine_СheckBox.Size = new Size(107, 19);
-            ThickLine_СheckBox.TabIndex = 4;
-            ThickLine_СheckBox.Text = "Толстая линия";
-            ThickLine_СheckBox.UseVisualStyleBackColor = true;
+            Contour_RadioButton.AutoSize = true;
+            Contour_RadioButton.Location = new Point(6, 72);
+            Contour_RadioButton.Name = "Contour_RadioButton";
+            Contour_RadioButton.Size = new Size(164, 19);
+            Contour_RadioButton.TabIndex = 2;
+            Contour_RadioButton.TabStop = true;
+            Contour_RadioButton.Text = "Обход сложного контура";
+            Contour_RadioButton.UseVisualStyleBackColor = true;
             // 
             // Form3
             // 
@@ -174,5 +187,6 @@
         private Button ColorSelection_Button;
         private ColorDialog colorDialog1;
         private CheckBox ThickLine_СheckBox;
+        private RadioButton Contour_RadioButton;
     }
 }
