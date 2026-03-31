@@ -19,9 +19,202 @@ namespace LR1T2
         Color currentFillColor = Color.Green;
         Color contourTraceColor = Color.Blue;
 
+        bool useBresenham = false;  // Для использования метода брезенхема
+
+        // НОВЫЕ ПОЛЯ для рисования линий
+        int dashStep = 5;                           // Шаг пунктира
+        bool isDashed = false;                      // Тип линии (сплошная/пунктирная)
         public Form3()
         {
             InitializeComponent();
+            InitializeLineDrawingComponents();
+        }
+        // Метод для рисования линии с поддержкой сплошной и пунктирной линии
+
+        private void DrawLineWithStyle(int x1, int y1, int x2, int y2, Color color, bool dashed, int dashStep)
+        {
+            if (myBitmap == null)
+                myBitmap = new Bitmap(PictureBox.Width, PictureBox.Height);
+
+            // Вычисляем длину отрезка
+            double dx = x2 - x1;
+            double dy = y2 - y1;
+            double length = Math.Sqrt(dx * dx + dy * dy);
+
+            if (length == 0)
+            {
+                if (ThickLine_СheckBox.Checked)
+                    DrawThickPixel(x1, y1, color);
+                else
+                    DrawPixel(x1, y1, color);
+                return;
+            }
+
+            if (!dashed)
+            {
+                // Рисуем сплошную линию
+                DrawLineWithAlgorithm(x1, y1, x2, y2, color);
+            }
+            else
+            {
+                // Рисуем пунктирную линию с заданным шагом
+                DrawDashedLine(x1, y1, x2, y2, color, dashStep);
+            }
+        }
+
+        // Метод для рисования сплошной линии (использует ваш CDA алгоритм)
+        private void DrawSolidLine(int x1, int y1, int x2, int y2, Color color)
+        {
+            double dx = x2 - x1;
+            double dy = y2 - y1;
+
+            int numberNodes = (int)Math.Max(Math.Abs(dx), Math.Abs(dy));
+
+            if (numberNodes == 0)
+            {
+                if (ThickLine_СheckBox.Checked)
+                    DrawThickPixel(x1, y1, color);
+                else
+                    DrawPixel(x1, y1, color);
+                return;
+            }
+
+            double xOutput = x1;
+            double yOutput = y1;
+
+            double xStep = dx / numberNodes;
+            double yStep = dy / numberNodes;
+
+            for (int i = 0; i <= numberNodes; i++)
+            {
+                int x = (int)Math.Round(xOutput);
+                int y = (int)Math.Round(yOutput);
+
+                // Используем вашу логику толщины через ThickLine_СheckBox
+                if (ThickLine_СheckBox.Checked)
+                    DrawThickPixel(x, y, color);
+                else
+                    DrawPixel(x, y, color);
+
+                xOutput += xStep;
+                yOutput += yStep;
+            }
+        }
+        
+        // Новый метод, который выбирает алгоритм
+        private void DrawLineWithAlgorithm(int x1, int y1, int x2, int y2, Color color)
+        {
+            if (useBresenham)
+                BresenhamLine(x1, y1, x2, y2, color);  // Брезенхем
+            else
+                CDA(x1, y1, x2, y2);                    // Ваш CDA
+        }
+        
+        // Метод для рисования пунктирной линии
+        private void DrawDashedLine(int x1, int y1, int x2, int y2, Color color, int dashLength)
+        {
+            double dx = x2 - x1;
+            double dy = y2 - y1;
+            double lineLength = Math.Sqrt(dx * dx + dy * dy);
+
+            if (lineLength == 0) return;
+
+            // Нормализованный вектор направления
+            double ux = dx / lineLength;
+            double uy = dy / lineLength;
+
+            double currentPos = 0;
+            bool draw = true; // Начинаем рисовать
+
+            while (currentPos < lineLength)
+            {
+                double segmentLength = draw ? dashLength : dashLength;
+
+                // Корректируем последний сегмент
+                if (currentPos + segmentLength > lineLength)
+                    segmentLength = lineLength - currentPos;
+
+                if (draw && segmentLength > 0)
+                {
+                    // Вычисляем конец текущего отрезка
+                    double endX = x1 + ux * (currentPos + segmentLength);
+                    double endY = y1 + uy * (currentPos + segmentLength);
+
+                    // Рисуем отрезок
+                    int xStart = (int)Math.Round(x1 + ux * currentPos);
+                    int yStart = (int)Math.Round(y1 + uy * currentPos);
+                    int xEnd = (int)Math.Round(endX);
+                    int yEnd = (int)Math.Round(endY);
+
+                    // Рисуем сплошной отрезок (он сам использует ThickLine_СheckBox)
+                    DrawLineWithAlgorithm(xStart, yStart, xEnd, yEnd, color);
+                }
+
+                currentPos += segmentLength;
+                draw = !draw; // Переключаем между рисованием и пропуском
+            }
+        }
+
+        private void InitializeLineDrawingComponents()
+        {
+            // Настройка NumericUpDown для шага пунктира
+            numericUpDownDashStep.Minimum = 2;
+            numericUpDownDashStep.Maximum = 20;
+            numericUpDownDashStep.Value = 5;
+            numericUpDownDashStep.ValueChanged += NumericUpDownDashStep_ValueChanged;
+
+            // Настройка ComboBox для типа линии
+            comboBoxLineType.Items.Add("Сплошная");
+            comboBoxLineType.Items.Add("Пунктирная");
+            comboBoxLineType.SelectedIndex = 0;
+            comboBoxLineType.SelectedIndexChanged += ComboBoxLineType_SelectedIndexChanged;
+
+            // Настройка кнопки рисования линии
+            buttonDrawLine.Click += ButtonDrawLine_Click;
+
+            // Изначально отключаем настройку шага пунктира
+            numericUpDownDashStep.Enabled = false;
+        }
+
+        // Обработчик изменения шага пунктира
+        private void NumericUpDownDashStep_ValueChanged(object sender, EventArgs e)
+        {
+            dashStep = (int)numericUpDownDashStep.Value;
+        }
+
+        // Обработчик изменения типа линии
+        private void ComboBoxLineType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            isDashed = (comboBoxLineType.SelectedIndex == 1);
+            // Если выбран пунктир, включаем NumericUpDown для шага
+            numericUpDownDashStep.Enabled = isDashed;
+        }
+        // Обработчик рисования отрезка
+        private void ButtonDrawLine_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Считываем координаты из TextBox
+                int x1 = Convert.ToInt32(textBoxX1.Text);
+                int y1 = Convert.ToInt32(textBoxY1.Text);
+                int x2 = Convert.ToInt32(textBoxX2.Text);
+                int y2 = Convert.ToInt32(textBoxY2.Text);
+
+                // Создаем bitmap если его нет
+                if (myBitmap == null)
+                    myBitmap = new Bitmap(PictureBox.Width, PictureBox.Height);
+                // Толщина определяется автоматически через ThickLine_СheckBox
+                DrawLineWithStyle(x1, y1, x2, y2, currentBorderColor, isDashed, dashStep);
+
+                // Обновляем PictureBox
+                PictureBox.Image = myBitmap;
+                PictureBox.Refresh();
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Пожалуйста, введите корректные числовые значения координат!",
+                    "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void PictureBox_MouseClick(object sender, MouseEventArgs e)
@@ -96,6 +289,30 @@ namespace LR1T2
             }
         }
 
+        // Алгоритм Брезенхема
+        private void BresenhamLine(int x1, int y1, int x2, int y2, Color color)
+        {
+            int dx = Math.Abs(x2 - x1);
+            int dy = Math.Abs(y2 - y1);
+            int sx = (x1 < x2) ? 1 : -1;
+            int sy = (y1 < y2) ? 1 : -1;
+            int err = dx - dy;
+            int x = x1, y = y1;
+
+            while (true)
+            {
+                if (ThickLine_СheckBox.Checked)
+                    DrawThickPixel(x, y, color);
+                else
+                    DrawPixel(x, y, color);
+
+                if (x == x2 && y == y2) break;
+
+                int e2 = 2 * err;
+                if (e2 > -dy) { err -= dy; x += sx; }
+                if (e2 < dx) { err += dx; y += sy; }
+            }
+        }
         private void PictureBox_MouseUp(object sender, MouseEventArgs e)
         {
             if (!CDA_RadioButton.Checked) return;
@@ -103,7 +320,7 @@ namespace LR1T2
             if (myBitmap == null)
                 myBitmap = new Bitmap(PictureBox.Width, PictureBox.Height);
 
-            CDA(xn, yn, e.X, e.Y);
+            DrawLineWithStyle(xn, yn, e.X, e.Y, currentBorderColor, isDashed, dashStep);
 
             PictureBox.Image = myBitmap;
             PictureBox.Refresh();
@@ -332,6 +549,16 @@ namespace LR1T2
                     stack.Push(neighbors[i]);
                 }
             }
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void radioButtonBresenham_CheckedChanged(object sender, EventArgs e)
+        {
+            useBresenham = radioButtonBresenham.Checked;
         }
     }
 }
