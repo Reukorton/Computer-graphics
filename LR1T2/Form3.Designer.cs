@@ -50,12 +50,13 @@
             Make_Button = new Button();
             Clear_Button = new Button();
             groupBox1 = new GroupBox();
+            SimpleCutting_RadioButton = new RadioButton();
             radioButtonBresenham = new RadioButton();
             Contour_RadioButton = new RadioButton();
             Filling_RadioButton = new RadioButton();
             CDA_RadioButton = new RadioButton();
             colorDialog1 = new ColorDialog();
-            SimpleCutting_RadioButton = new RadioButton();
+            PolygonFill_RadioButton = new RadioButton();
             ((System.ComponentModel.ISupportInitialize)PictureBox).BeginInit();
             panel1.SuspendLayout();
             groupBox3.SuspendLayout();
@@ -70,7 +71,7 @@
             PictureBox.Location = new Point(9, 12);
             PictureBox.Margin = new Padding(0);
             PictureBox.Name = "PictureBox";
-            PictureBox.Size = new Size(431, 426);
+            PictureBox.Size = new Size(431, 442);
             PictureBox.TabIndex = 0;
             PictureBox.TabStop = false;
             PictureBox.MouseClick += PictureBox_MouseClick;
@@ -89,7 +90,7 @@
             panel1.Controls.Add(groupBox1);
             panel1.Location = new Point(443, 12);
             panel1.Name = "panel1";
-            panel1.Size = new Size(232, 426);
+            panel1.Size = new Size(232, 442);
             panel1.TabIndex = 1;
             // 
             // groupBox3
@@ -103,9 +104,9 @@
             groupBox3.Controls.Add(label6);
             groupBox3.Controls.Add(label5);
             groupBox3.Controls.Add(label4);
-            groupBox3.Location = new Point(3, 238);
+            groupBox3.Location = new Point(3, 257);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new Size(228, 125);
+            groupBox3.Size = new Size(224, 125);
             groupBox3.TabIndex = 6;
             groupBox3.TabStop = false;
             groupBox3.Text = "Рисование отрезка";
@@ -190,7 +191,7 @@
             groupBox2.Controls.Add(label2);
             groupBox2.Controls.Add(comboBoxLineType);
             groupBox2.Controls.Add(label1);
-            groupBox2.Location = new Point(3, 161);
+            groupBox2.Location = new Point(3, 180);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(224, 71);
             groupBox2.TabIndex = 5;
@@ -237,7 +238,7 @@
             // ThickLine_СheckBox
             // 
             ThickLine_СheckBox.AutoSize = true;
-            ThickLine_СheckBox.Location = new Point(113, 372);
+            ThickLine_СheckBox.Location = new Point(113, 388);
             ThickLine_СheckBox.Name = "ThickLine_СheckBox";
             ThickLine_СheckBox.Size = new Size(107, 19);
             ThickLine_СheckBox.TabIndex = 4;
@@ -247,7 +248,7 @@
             // ColorSelection_Button
             // 
             ColorSelection_Button.FlatStyle = FlatStyle.Popup;
-            ColorSelection_Button.Location = new Point(3, 369);
+            ColorSelection_Button.Location = new Point(3, 385);
             ColorSelection_Button.Name = "ColorSelection_Button";
             ColorSelection_Button.Size = new Size(104, 23);
             ColorSelection_Button.TabIndex = 3;
@@ -258,7 +259,7 @@
             // Make_Button
             // 
             Make_Button.FlatStyle = FlatStyle.Popup;
-            Make_Button.Location = new Point(3, 398);
+            Make_Button.Location = new Point(3, 414);
             Make_Button.Name = "Make_Button";
             Make_Button.Size = new Size(104, 23);
             Make_Button.TabIndex = 2;
@@ -269,7 +270,7 @@
             // Clear_Button
             // 
             Clear_Button.FlatStyle = FlatStyle.Popup;
-            Clear_Button.Location = new Point(113, 398);
+            Clear_Button.Location = new Point(113, 414);
             Clear_Button.Name = "Clear_Button";
             Clear_Button.Size = new Size(114, 23);
             Clear_Button.TabIndex = 1;
@@ -279,17 +280,29 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(PolygonFill_RadioButton);
             groupBox1.Controls.Add(SimpleCutting_RadioButton);
             groupBox1.Controls.Add(radioButtonBresenham);
             groupBox1.Controls.Add(Contour_RadioButton);
             groupBox1.Controls.Add(Filling_RadioButton);
             groupBox1.Controls.Add(CDA_RadioButton);
-            groupBox1.Location = new Point(3, 12);
+            groupBox1.Location = new Point(3, 3);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(228, 143);
+            groupBox1.Size = new Size(224, 171);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             groupBox1.Text = "Выберите алгоритм";
+            // 
+            // SimpleCutting_RadioButton
+            // 
+            SimpleCutting_RadioButton.AutoSize = true;
+            SimpleCutting_RadioButton.Location = new Point(6, 118);
+            SimpleCutting_RadioButton.Name = "SimpleCutting_RadioButton";
+            SimpleCutting_RadioButton.Size = new Size(151, 19);
+            SimpleCutting_RadioButton.TabIndex = 4;
+            SimpleCutting_RadioButton.TabStop = true;
+            SimpleCutting_RadioButton.Text = "Простое 2D-отсечение";
+            SimpleCutting_RadioButton.UseVisualStyleBackColor = true;
             // 
             // radioButtonBresenham
             // 
@@ -336,22 +349,22 @@
             CDA_RadioButton.Text = "Обычный ЦДА";
             CDA_RadioButton.UseVisualStyleBackColor = true;
             // 
-            // SimpleCutting_RadioButton
+            // PolygonFill_RadioButton
             // 
-            SimpleCutting_RadioButton.AutoSize = true;
-            SimpleCutting_RadioButton.Location = new Point(6, 118);
-            SimpleCutting_RadioButton.Name = "SimpleCutting_RadioButton";
-            SimpleCutting_RadioButton.Size = new Size(151, 19);
-            SimpleCutting_RadioButton.TabIndex = 4;
-            SimpleCutting_RadioButton.TabStop = true;
-            SimpleCutting_RadioButton.Text = "Простое 2D-отсечение";
-            SimpleCutting_RadioButton.UseVisualStyleBackColor = true;
+            PolygonFill_RadioButton.AutoSize = true;
+            PolygonFill_RadioButton.Location = new Point(6, 143);
+            PolygonFill_RadioButton.Name = "PolygonFill_RadioButton";
+            PolygonFill_RadioButton.Size = new Size(170, 19);
+            PolygonFill_RadioButton.TabIndex = 5;
+            PolygonFill_RadioButton.TabStop = true;
+            PolygonFill_RadioButton.Text = "Закраска многоугольника";
+            PolygonFill_RadioButton.UseVisualStyleBackColor = true;
             // 
             // Form3
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(687, 450);
+            ClientSize = new Size(687, 463);
             Controls.Add(panel1);
             Controls.Add(PictureBox);
             Name = "Form3";
@@ -399,5 +412,6 @@
         private Label label4;
         private RadioButton radioButtonBresenham;
         private RadioButton SimpleCutting_RadioButton;
+        private RadioButton PolygonFill_RadioButton;
     }
 }
