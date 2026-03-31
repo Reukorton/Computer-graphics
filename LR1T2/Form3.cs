@@ -477,6 +477,25 @@ namespace LR1T2
                     }
                 }
             }
+            else if (PolygonFill_RadioButton.Checked)
+            {
+                myBitmap = new Bitmap(PictureBox.Width, PictureBox.Height);
+
+                Point[] polygon =
+                {
+                    new Point(150, 40),
+                    new Point(250, 90),
+                    new Point(220, 180),
+                    new Point(100, 160),
+                    new Point(80, 80)
+                };
+
+                FillPolygonXY(polygon);
+
+                PictureBox.Image = myBitmap;
+                PictureBox.Refresh();
+            }
+
         }
 
         private void DrawPixel(int x, int y, Color color)
@@ -789,6 +808,74 @@ namespace LR1T2
             p2 = new Point((int)points[1].X, (int)points[1].Y);
 
             return true;
+        }
+
+
+
+
+        private void FillPolygonXY(Point[] polygon)
+        {
+            int yMin = polygon[0].Y;
+            int yMax = polygon[0].Y;
+
+            for (int i = 1; i < polygon.Length; i++)
+            {
+                if (polygon[i].Y < yMin) yMin = polygon[i].Y;
+                if (polygon[i].Y > yMax) yMax = polygon[i].Y;
+            }
+
+            for (int y = yMin; y <= yMax; y++)
+            {
+                List<int> xIntersections = new List<int>();
+
+                for (int i = 0; i < polygon.Length; i++)
+                {
+                    Point p1 = polygon[i];
+                    Point p2 = polygon[(i + 1) % polygon.Length];
+
+                    if (p1.Y == p2.Y)
+                        continue;
+
+                    if ((y >= Math.Min(p1.Y, p2.Y)) && (y < Math.Max(p1.Y, p2.Y)))
+                    {
+                        int x = p1.X + (y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y);
+                        xIntersections.Add(x);
+                    }
+                }
+
+                xIntersections.Sort();
+
+                for (int i = 0; i < xIntersections.Count; i += 2)
+                {
+                    DrawHorizontalLine(xIntersections[i], xIntersections[i + 1], y, currentFillColor);
+                }
+            }
+
+            for (int i = 0; i < polygon.Length; i++)
+            {
+                Point p1 = polygon[i];
+                Point p2 = polygon[(i + 1) % polygon.Length];
+
+                if (useBresenham)
+                    BresenhamLine(p1.X, p1.Y, p2.X, p2.Y, currentBorderColor);
+                else
+                    CDA(p1.X, p1.Y, p2.X, p2.Y);
+            }
+        }
+
+        private void DrawHorizontalLine(int x1, int x2, int y, Color color)
+        {
+            if (x1 > x2)
+            {
+                int t = x1;
+                x1 = x2;
+                x2 = t;
+            }
+
+            for (int x = x1; x <= x2; x++)
+            {
+                DrawPixel(x, y, color);
+            }
         }
     }
 }
