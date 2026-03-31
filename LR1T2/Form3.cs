@@ -19,6 +19,23 @@ namespace LR1T2
         Color currentFillColor = Color.Green;
         Color contourTraceColor = Color.Blue;
 
+        /// <summary>
+        /// Прямоугольное окно отсечения.
+        /// </summary>
+        Rectangle clipRectangle = new Rectangle(120, 80, 180, 140);
+
+        /// <summary>
+        /// Начальная и конечная точки отрезка,
+        /// который нужно отсечь.
+        /// </summary>
+        Point clipStart, clipEnd;
+
+        /// <summary>
+        /// Признак того, что отрезок для отсечения уже задан.
+        /// </summary>
+        bool clipLineDefined = false;
+
+
         bool useBresenham = false;  // Для использования метода брезенхема
 
         // НОВЫЕ ПОЛЯ для рисования линий
@@ -100,7 +117,7 @@ namespace LR1T2
                 yOutput += yStep;
             }
         }
-        
+
         // Новый метод, который выбирает алгоритм
         private void DrawLineWithAlgorithm(int x1, int y1, int x2, int y2, Color color)
         {
@@ -109,7 +126,7 @@ namespace LR1T2
             else
                 CDA(x1, y1, x2, y2);                    // Ваш CDA
         }
-        
+
         // Метод для рисования пунктирной линии
         private void DrawDashedLine(int x1, int y1, int x2, int y2, Color color, int dashLength)
         {
@@ -244,7 +261,7 @@ namespace LR1T2
 
         private void PictureBox_MouseDown(object sender, MouseEventArgs e)
         {
-            if (CDA_RadioButton.Checked == true)
+            if (CDA_RadioButton.Checked == true || SimpleCutting_RadioButton.Checked == true)
             {
                 xn = e.X;
                 yn = e.Y;
@@ -315,21 +332,31 @@ namespace LR1T2
         }
         private void PictureBox_MouseUp(object sender, MouseEventArgs e)
         {
-            if (!CDA_RadioButton.Checked) return;
+            if (CDA_RadioButton.Checked == true)
+            {
+                if (myBitmap == null)
+                    myBitmap = new Bitmap(PictureBox.Width, PictureBox.Height);
 
-            if (myBitmap == null)
-                myBitmap = new Bitmap(PictureBox.Width, PictureBox.Height);
+                CDA(xn, yn, e.X, e.Y);
 
-            DrawLineWithStyle(xn, yn, e.X, e.Y, currentBorderColor, isDashed, dashStep);
+                PictureBox.Image = myBitmap;
+                PictureBox.Refresh();
+            }
+            else if (SimpleCutting_RadioButton.Checked == true)
+            {
+                clipStart = new Point(xn, yn);
+                clipEnd = new Point(e.X, e.Y);
+                clipLineDefined = true;
 
-            PictureBox.Image = myBitmap;
-            PictureBox.Refresh();
+                DrawClipScene();
+            }
         }
 
         private void Clear_Button_Click(object sender, EventArgs e)
         {
             PictureBox.Image = null;
             myBitmap = null;
+            clipLineDefined = false;
         }
 
         private void ColorSelection_Button_Click(object sender, EventArgs e)
@@ -429,6 +456,26 @@ namespace LR1T2
                 }
 
                 await TraceComplexContour();
+            }
+            else if (SimpleCutting_RadioButton.Checked)
+            {
+                Point p1 = clipStart;
+                Point p2 = clipEnd;
+
+                DrawClipScene();
+
+                if (clipLineDefined == true)
+                {
+                    if (SimpleClip(ref p1, ref p2))
+                    {
+                        Graphics g = Graphics.FromImage(myBitmap);
+                        Pen myPen = new Pen(Color.Red, 2);
+                        g.DrawLine(myPen, p1, p2);
+
+                        PictureBox.Image = myBitmap;
+                        PictureBox.Refresh();
+                    }
+                }
             }
         }
 
@@ -559,6 +606,189 @@ namespace LR1T2
         private void radioButtonBresenham_CheckedChanged(object sender, EventArgs e)
         {
             useBresenham = radioButtonBresenham.Checked;
+        }
+
+        /// <summary>
+        /// Рисует сцену для простого двумерного отсечения:
+        /// окно отсечения и исходный отрезок.
+        /// </summary>
+        private void DrawClipScene()
+        {
+            myBitmap = new Bitmap(PictureBox.Width, PictureBox.Height);
+
+            Graphics g = Graphics.FromImage(myBitmap);
+
+            g.Clear(Color.White);
+            g.DrawRectangle(Pens.Black, clipRectangle);
+            g.DrawLine(Pens.Gray, clipStart, clipEnd);
+
+            PictureBox.Image = myBitmap;
+            PictureBox.Refresh();
+        }
+
+        /// <summary>
+        /// Проверяет, находится ли точка внутри окна отсечения.
+        /// </summary>
+        /// <param name="x">Координата X точки.</param>
+        /// <param name="y">Координата Y точки.</param>
+        /// <returns>
+        /// true, если точка находится внутри окна отсечения;
+        /// иначе false.
+        /// </returns>
+        private bool PointInsideRectangle(double x, double y)
+        {
+            return x >= clipRectangle.Left && x <= clipRectangle.Right &&
+                   y >= clipRectangle.Top && y <= clipRectangle.Bottom;
+        }
+
+        /// <summary>
+        /// Вычисляет пересечение отрезка с левой стороной окна отсечения
+        /// и добавляет найденную точку в список.
+        /// </summary>
+        /// <param name="x1">X первой точки отрезка.</param>
+        /// <param name="y1">Y первой точки отрезка.</param>
+        /// <param name="x2">X второй точки отрезка.</param>
+        /// <param name="y2">Y второй точки отрезка.</param>
+        /// <param name="xl">Левая граница окна.</param>
+        /// <param name="yv">Верхняя граница окна.</param>
+        /// <param name="yn">Нижняя граница окна.</param>
+        /// <param name="points">Список найденных точек пересечения.</param>
+        private void AddIntersectionWithLeftSide(double x1, double y1, double x2, double y2, double xl, double yv, double yn, List<PointF> points)
+        {
+            if (x1 == x2) return;
+
+            double t = (xl - x1) / (x2 - x1);
+            if (t < 0 || t > 1) return;
+
+            double m = (y2 - y1) / (x2 - x1);
+            double y = m * (xl - x1) + y1;
+
+            if (y >= yv && y <= yn)
+                points.Add(new PointF((float)xl, (float)y));
+        }
+
+        /// <summary>
+        /// Вычисляет пересечение отрезка с правой стороной окна отсечения
+        /// и добавляет найденную точку в список.
+        /// </summary>
+        /// <param name="x1">X первой точки отрезка.</param>
+        /// <param name="y1">Y первой точки отрезка.</param>
+        /// <param name="x2">X второй точки отрезка.</param>
+        /// <param name="y2">Y второй точки отрезка.</param>
+        /// <param name="xp">Правая граница окна.</param>
+        /// <param name="yv">Верхняя граница окна.</param>
+        /// <param name="yn">Нижняя граница окна.</param>
+        /// <param name="points">Список найденных точек пересечения.</param>
+        private void AddIntersectionWithRightSide(double x1, double y1, double x2, double y2, double xp, double yv, double yn, List<PointF> points)
+        {
+            if (x1 == x2) return;
+
+            double t = (xp - x1) / (x2 - x1);
+            if (t < 0 || t > 1) return;
+
+            double m = (y2 - y1) / (x2 - x1);
+            double y = m * (xp - x1) + y1;
+
+            if (y >= yv && y <= yn)
+                points.Add(new PointF((float)xp, (float)y));
+        }
+
+        /// <summary>
+        /// Вычисляет пересечение отрезка с верхней стороной окна отсечения
+        /// и добавляет найденную точку в список.
+        /// </summary>
+        /// <param name="x1">X первой точки отрезка.</param>
+        /// <param name="y1">Y первой точки отрезка.</param>
+        /// <param name="x2">X второй точки отрезка.</param>
+        /// <param name="y2">Y второй точки отрезка.</param>
+        /// <param name="yv">Верхняя граница окна.</param>
+        /// <param name="xl">Левая граница окна.</param>
+        /// <param name="xp">Правая граница окна.</param>
+        /// <param name="points">Список найденных точек пересечения.</param>
+        private void AddIntersectionWithTopSide(double x1, double y1, double x2, double y2, double yv, double xl, double xp, List<PointF> points)
+        {
+            if (y1 == y2) return;
+
+            double t = (yv - y1) / (y2 - y1);
+            if (t < 0 || t > 1) return;
+
+            double m = (y2 - y1) / (x2 - x1);
+            double x = x1 + (yv - y1) / m;
+
+            if (x >= xl && x <= xp)
+                points.Add(new PointF((float)x, (float)yv));
+        }
+
+        /// <summary>
+        /// Вычисляет пересечение отрезка с нижней стороной окна отсечения
+        /// и добавляет найденную точку в список.
+        /// </summary>
+        /// <param name="x1">X первой точки отрезка.</param>
+        /// <param name="y1">Y первой точки отрезка.</param>
+        /// <param name="x2">X второй точки отрезка.</param>
+        /// <param name="y2">Y второй точки отрезка.</param>
+        /// <param name="yn">Нижняя граница окна.</param>
+        /// <param name="xl">Левая граница окна.</param>
+        /// <param name="xp">Правая граница окна.</param>
+        /// <param name="points">Список найденных точек пересечения.</param>
+        private void AddIntersectionWithBottomSide(double x1, double y1, double x2, double y2, double yn, double xl, double xp, List<PointF> points)
+        {
+            if (y1 == y2) return;
+
+            double t = (yn - y1) / (y2 - y1);
+            if (t < 0 || t > 1) return;
+
+            double m = (y2 - y1) / (x2 - x1);
+            double x = x1 + (yn - y1) / m;
+
+            if (x >= xl && x <= xp)
+                points.Add(new PointF((float)x, (float)yn));
+        }
+
+        /// <summary>
+        /// Выполняет простое двумерное отсечение отрезка прямоугольным окном.
+        /// </summary>
+        /// <param name="p1">Первая точка отрезка. После выполнения содержит первую точку видимой части.</param>
+        /// <param name="p2">Вторая точка отрезка. После выполнения содержит вторую точку видимой части.</param>
+        /// <returns>
+        /// true, если отрезок полностью или частично видим;
+        /// false, если отрезок полностью невидим.
+        /// </returns>
+        private bool SimpleClip(ref Point p1, ref Point p2)
+        {
+            double x1 = p1.X, y1 = p1.Y;
+            double x2 = p2.X, y2 = p2.Y;
+
+            double xl = clipRectangle.Left;
+            double xp = clipRectangle.Right;
+            double yv = clipRectangle.Top;
+            double yn = clipRectangle.Bottom;
+
+            if (PointInsideRectangle(x1, y1) && PointInsideRectangle(x2, y2))
+                return true;
+
+            if (x1 < xl && x2 < xl) return false;
+            if (x1 > xp && x2 > xp) return false;
+            if (y1 < yv && y2 < yv) return false;
+            if (y1 > yn && y2 > yn) return false;
+
+            List<PointF> points = new List<PointF>();
+
+            if (PointInsideRectangle(x1, y1))
+                points.Add(new PointF((float)x1, (float)y1));
+
+            if (PointInsideRectangle(x2, y2))
+                points.Add(new PointF((float)x2, (float)y2));
+
+            AddIntersectionWithLeftSide(x1, y1, x2, y2, xl, yv, yn, points);
+            AddIntersectionWithRightSide(x1, y1, x2, y2, xp, yv, yn, points);
+            AddIntersectionWithTopSide(x1, y1, x2, y2, yv, xl, xp, points);
+            AddIntersectionWithBottomSide(x1, y1, x2, y2, yn, xl, xp, points);
+
+            p1 = new Point((int)points[0].X, (int)points[0].Y);
+            p2 = new Point((int)points[1].X, (int)points[1].Y);
+
+            return true;
         }
     }
 }
