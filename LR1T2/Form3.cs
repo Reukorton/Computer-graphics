@@ -36,6 +36,20 @@ namespace LR1T2
         bool clipLineDefined = false;
 
 
+
+        /// <summary>
+        /// Список вершин многоугольника,
+        /// который пользователь задает на PictureBox.
+        /// </summary>
+        List<Point> polygonPoints = new List<Point>();
+
+        /// <summary>
+        /// Признак того, что ввод вершин многоугольника уже начат.
+        /// </summary>
+        bool polygonInputStarted = false;
+
+
+
         bool useBresenham = false;  // Для использования метода брезенхема
 
         // НОВЫЕ ПОЛЯ для рисования линий
@@ -234,29 +248,72 @@ namespace LR1T2
             }
         }
 
+
+        /// <summary>
+        /// Обрабатывает щелчки мыши по PictureBox:
+        /// для режима заливки выполняет заливку с затравкой,
+        /// для режима закраски многоугольника задает вершины
+        /// и замыкает контур.
+        /// </summary>
+        /// <param name="sender">Источник события.</param>
+        /// <param name="e">Параметры щелчка мыши.</param>
         private void PictureBox_MouseClick(object sender, MouseEventArgs e)
         {
-            if (!Filling_RadioButton.Checked)
-                return;
-
-            myBitmap = PictureBox.Image as Bitmap;
-
-            if (myBitmap == null)
+            if (Filling_RadioButton.Checked)
             {
-                MessageBox.Show("Сначала нарисуйте замкнутый контур.");
-                return;
+                myBitmap = PictureBox.Image as Bitmap;
+
+                if (myBitmap == null)
+                {
+                    MessageBox.Show("Сначала нарисуйте замкнутый контур.");
+                    return;
+                }
+
+                Color startColor = myBitmap.GetPixel(e.X, e.Y);
+
+                if (startColor.ToArgb() == currentBorderColor.ToArgb() ||
+                    startColor.ToArgb() == currentFillColor.ToArgb())
+                    return;
+
+                FloodFill(e.X, e.Y, startColor);
+
+                PictureBox.Image = myBitmap;
+                PictureBox.Refresh();
             }
+            else if (PolygonFill_RadioButton.Checked)
+            {
+                if (myBitmap == null)
+                    myBitmap = new Bitmap(PictureBox.Width, PictureBox.Height);
 
-            Color startColor = myBitmap.GetPixel(e.X, e.Y);
+                if (e.Button == MouseButtons.Left)
+                {
+                    Point p = new Point(e.X, e.Y);
 
-            if (startColor.ToArgb() == currentBorderColor.ToArgb() ||
-                startColor.ToArgb() == currentFillColor.ToArgb())
-                return;
+                    if (polygonInputStarted == false)
+                    {
+                        polygonPoints.Clear();
+                        polygonPoints.Add(p);
+                        polygonInputStarted = true;
+                    }
+                    else
+                    {
+                        Point prev = polygonPoints[polygonPoints.Count - 1];
+                        polygonPoints.Add(p);
 
-            FloodFill(e.X, e.Y, startColor);
+                        if (useBresenham)
+                            BresenhamLine(prev.X, prev.Y, p.X, p.Y, currentBorderColor);
+                        else
+                            CDA(prev.X, prev.Y, p.X, p.Y);
 
-            PictureBox.Image = myBitmap;
-            PictureBox.Refresh();
+                        PictureBox.Image = myBitmap;
+                        PictureBox.Refresh();
+                    }
+                }
+                else if (e.Button == MouseButtons.Right)
+                {
+                    ClosePolygon();
+                }
+            }
         }
 
         private void PictureBox_MouseDown(object sender, MouseEventArgs e)
@@ -357,6 +414,8 @@ namespace LR1T2
             PictureBox.Image = null;
             myBitmap = null;
             clipLineDefined = false;
+            polygonPoints.Clear();
+            polygonInputStarted = false;
         }
 
         private void ColorSelection_Button_Click(object sender, EventArgs e)
@@ -365,17 +424,7 @@ namespace LR1T2
 
             if (dialogResult != DialogResult.OK) return;
 
-            if (CDA_RadioButton.Checked)
-            {
-                if (colorDialog1.Color.ToArgb() == currentFillColor.ToArgb())
-                {
-                    MessageBox.Show("Цвет границы не должен совпадать с цветом заливки.");
-                    return;
-                }
-
-                currentBorderColor = colorDialog1.Color;
-            }
-            else if (Filling_RadioButton.Checked)
+            if (Filling_RadioButton.Checked || PolygonFill_RadioButton.Checked)
             {
                 if (colorDialog1.Color.ToArgb() == currentBorderColor.ToArgb())
                 {
@@ -384,6 +433,16 @@ namespace LR1T2
                 }
 
                 currentFillColor = colorDialog1.Color;
+            }
+            else
+            {
+                if (colorDialog1.Color.ToArgb() == currentFillColor.ToArgb())
+                {
+                    MessageBox.Show("Цвет границы не должен совпадать с цветом заливки.");
+                    return;
+                }
+
+                currentBorderColor = colorDialog1.Color;
             }
         }
 
@@ -479,18 +538,15 @@ namespace LR1T2
             }
             else if (PolygonFill_RadioButton.Checked)
             {
-                myBitmap = new Bitmap(PictureBox.Width, PictureBox.Height);
+                myBitmap = PictureBox.Image as Bitmap;
 
-                Point[] polygon =
+                if (myBitmap == null || polygonPoints.Count < 3)
                 {
-                    new Point(150, 40),
-                    new Point(250, 90),
-                    new Point(220, 180),
-                    new Point(100, 160),
-                    new Point(80, 80)
-                };
+                    MessageBox.Show("Сначала постройте многоугольник.");
+                    return;
+                }
 
-                FillPolygonXY(polygon);
+                FillPolygonXY(polygonPoints);
 
                 PictureBox.Image = myBitmap;
                 PictureBox.Refresh();
@@ -813,12 +869,18 @@ namespace LR1T2
 
 
 
-        private void FillPolygonXY(Point[] polygon)
+
+        /// <summary>
+        /// Выполняет построчную закраску многоугольника
+        /// по XY-алгоритму.
+        /// </summary>
+        /// <param name="polygon">Список вершин многоугольника.</param>
+        private void FillPolygonXY(List<Point> polygon)
         {
             int yMin = polygon[0].Y;
             int yMax = polygon[0].Y;
 
-            for (int i = 1; i < polygon.Length; i++)
+            for (int i = 1; i < polygon.Count; i++)
             {
                 if (polygon[i].Y < yMin) yMin = polygon[i].Y;
                 if (polygon[i].Y > yMax) yMax = polygon[i].Y;
@@ -828,10 +890,10 @@ namespace LR1T2
             {
                 List<int> xIntersections = new List<int>();
 
-                for (int i = 0; i < polygon.Length; i++)
+                for (int i = 0; i < polygon.Count; i++)
                 {
                     Point p1 = polygon[i];
-                    Point p2 = polygon[(i + 1) % polygon.Length];
+                    Point p2 = polygon[(i + 1) % polygon.Count];
 
                     if (p1.Y == p2.Y)
                         continue;
@@ -845,16 +907,16 @@ namespace LR1T2
 
                 xIntersections.Sort();
 
-                for (int i = 0; i < xIntersections.Count; i += 2)
+                for (int i = 0; i < xIntersections.Count - 1; i += 2)
                 {
                     DrawHorizontalLine(xIntersections[i], xIntersections[i + 1], y, currentFillColor);
                 }
             }
 
-            for (int i = 0; i < polygon.Length; i++)
+            for (int i = 0; i < polygon.Count; i++)
             {
                 Point p1 = polygon[i];
-                Point p2 = polygon[(i + 1) % polygon.Length];
+                Point p2 = polygon[(i + 1) % polygon.Count];
 
                 if (useBresenham)
                     BresenhamLine(p1.X, p1.Y, p2.X, p2.Y, currentBorderColor);
@@ -863,6 +925,35 @@ namespace LR1T2
             }
         }
 
+        /// <summary>
+        /// Замыкает многоугольник последним ребром:
+        /// соединяет последнюю введенную вершину с первой.
+        /// </summary>
+        private void ClosePolygon()
+        {
+            if (polygonPoints.Count < 3)
+                return;
+
+            Point p1 = polygonPoints[polygonPoints.Count - 1];
+            Point p2 = polygonPoints[0];
+
+            if (useBresenham)
+                BresenhamLine(p1.X, p1.Y, p2.X, p2.Y, currentBorderColor);
+            else
+                CDA(p1.X, p1.Y, p2.X, p2.Y);
+
+            PictureBox.Image = myBitmap;
+            PictureBox.Refresh();
+        }
+
+        /// <summary>
+        /// Рисует горизонтальный отрезок строки,
+        /// используемый при закраске многоугольника.
+        /// </summary>
+        /// <param name="x1">Начальная координата X.</param>
+        /// <param name="x2">Конечная координата X.</param>
+        /// <param name="y">Координата Y строки.</param>
+        /// <param name="color">Цвет закраски.</param>
         private void DrawHorizontalLine(int x1, int x2, int y, Color color)
         {
             if (x1 > x2)
