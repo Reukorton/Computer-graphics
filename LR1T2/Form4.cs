@@ -13,12 +13,24 @@ namespace LR1T2
 {
     public partial class Form4 : Form
     {
-        int[,] kv = new int[4, 3]; // матрица тела
+        int[,] kv = new int[5, 3]; // матрица тела
+        int currentFigure = 3; // выбранная фигура
         int[,] osi = new int[4, 3]; // матрица координат осей
         int[,] matr_sdv = new int[3, 3]; // матрица преобразования
 
         int k, l; // элементы матрицы сдвига
         bool f = true; // переменная для запуска и остановки движения
+        double angle = 0; // угол поворота
+        double scale = 1; // масштаб
+
+        int reflectX = 1; // отражение по X
+        int reflectY = 1; // отражение по Y
+
+        int animationMode = 1;
+        // 1 - смещение
+        // 2 - поворот
+        // 3 - масштабирование: увеличить
+        // 4 - масштабирование: уменьшить
         public Form4()
         {
             InitializeComponent();
@@ -31,12 +43,46 @@ namespace LR1T2
         }
 
         // инициализация матрицы тела
-        private void Init_kvadrat()
+        private void Init_figure()
         {
-            kv[0, 0] = -50; kv[0, 1] = 0; kv[0, 2] = 1;
-            kv[1, 0] = 0; kv[1, 1] = 50; kv[1, 2] = 1;
-            kv[2, 0] = 50; kv[2, 1] = 0; kv[2, 2] = 1;
-            kv[3, 0] = 0; kv[3, 1] = -50; kv[3, 2] = 1;
+            if (currentFigure == 3)
+            {
+                // Вариант 3
+                kv[0, 0] = -65; kv[0, 1] = -100; kv[0, 2] = 1; // верхняя левая
+                kv[1, 0] = 65; kv[1, 1] = -100; kv[1, 2] = 1; // верхняя правая
+                kv[2, 0] = -65; kv[2, 1] = 110; kv[2, 2] = 1; // нижняя левая
+                kv[3, 0] = 95; kv[3, 1] = 80; kv[3, 2] = 1; // нижняя правая
+            }
+
+            if (currentFigure == 4)
+            {
+                // Вариант 4
+                kv[0, 0] = -70; kv[0, 1] = -100; kv[0, 2] = 1;
+                kv[1, 0] = 80; kv[1, 1] = -70; kv[1, 2] = 1;
+                kv[2, 0] = 10; kv[2, 1] = 0; kv[2, 2] = 1;
+                kv[3, 0] = 80; kv[3, 1] = 70; kv[3, 2] = 1;
+                kv[4, 0] = -70; kv[4, 1] = 100; kv[4, 2] = 1;
+            }
+
+            if (currentFigure == 11)
+            {
+                // Вариант 11
+                kv[0, 0] = 0; kv[0, 1] = -90; kv[0, 2] = 1;
+                kv[1, 0] = 90; kv[1, 1] = 0; kv[1, 2] = 1;
+                kv[2, 0] = 0; kv[2, 1] = 90; kv[2, 2] = 1;
+                kv[3, 0] = -90; kv[3, 1] = 0; kv[3, 2] = 1;
+                kv[4, 0] = 0; kv[4, 1] = 0; kv[4, 2] = 1;
+            }
+
+            if (currentFigure == 13)
+            {
+                // Вариант 13
+                kv[0, 0] = -80; kv[0, 1] = -90; kv[0, 2] = 1;
+                kv[1, 0] = -80; kv[1, 1] = 70; kv[1, 2] = 1;
+                kv[2, 0] = 40; kv[2, 1] = 100; kv[2, 2] = 1;
+                kv[3, 0] = 130; kv[3, 1] = 45; kv[3, 2] = 1;
+                kv[4, 0] = 0; kv[4, 1] = 0; kv[4, 2] = 1;
+            }
         }
 
         // инициализация матрицы сдвига
@@ -79,33 +125,177 @@ namespace LR1T2
 
             return r;
         }
+        // перевод int матрицы в double
+        private double[,] IntToDouble(int[,] a)
+        {
+            int n = a.GetLength(0);
+            int m = a.GetLength(1);
 
-        // вывод квадрата на экран
+            double[,] r = new double[n, m];
+
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < m; j++)
+                {
+                    r[i, j] = a[i, j];
+                }
+            }
+
+            return r;
+        }
+
+        // умножение матриц double
+        private double[,] Multiply_matr_double(double[,] a, double[,] b)
+        {
+            int n = a.GetLength(0);
+            int m = b.GetLength(1);
+            int p = a.GetLength(1);
+
+            double[,] r = new double[n, m];
+
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < m; j++)
+                {
+                    r[i, j] = 0;
+
+                    for (int ii = 0; ii < p; ii++)
+                    {
+                        r[i, j] += a[i, ii] * b[ii, j];
+                    }
+                }
+            }
+
+            return r;
+        }
+
+        // матрица сдвига
+        private double[,] Init_matr_sdv_double(double k1, double l1)
+        {
+            double[,] m = new double[3, 3];
+
+            m[0, 0] = 1; m[0, 1] = 0; m[0, 2] = 0;
+            m[1, 0] = 0; m[1, 1] = 1; m[1, 2] = 0;
+            m[2, 0] = k1; m[2, 1] = l1; m[2, 2] = 1;
+
+            return m;
+        }
+
+        // матрица масштабирования
+        private double[,] Init_matr_scale(double s)
+        {
+            double[,] m = new double[3, 3];
+
+            m[0, 0] = s; m[0, 1] = 0; m[0, 2] = 0;
+            m[1, 0] = 0; m[1, 1] = s; m[1, 2] = 0;
+            m[2, 0] = 0; m[2, 1] = 0; m[2, 2] = 1;
+
+            return m;
+        }
+
+        // матрица поворота
+        private double[,] Init_matr_rotate(double angle)
+        {
+            double[,] m = new double[3, 3];
+
+            double a = angle * Math.PI / 180;
+
+            m[0, 0] = Math.Cos(a); m[0, 1] = Math.Sin(a); m[0, 2] = 0;
+            m[1, 0] = -Math.Sin(a); m[1, 1] = Math.Cos(a); m[1, 2] = 0;
+            m[2, 0] = 0; m[2, 1] = 0; m[2, 2] = 1;
+
+            return m;
+        }
+
+        // матрица отражения
+        private double[,] Init_matr_reflect(int rx, int ry)
+        {
+            double[,] m = new double[3, 3];
+
+            m[0, 0] = rx; m[0, 1] = 0; m[0, 2] = 0;
+            m[1, 0] = 0; m[1, 1] = ry; m[1, 2] = 0;
+            m[2, 0] = 0; m[2, 1] = 0; m[2, 2] = 1;
+
+            return m;
+        }
+
+        // рисование линии по double координатам
+        private void DrawLineDouble(Graphics g, Pen myPen, double[,] a, int p1, int p2)
+        {
+            g.DrawLine(
+                myPen,
+                Convert.ToInt32(a[p1, 0]),
+                Convert.ToInt32(a[p1, 1]),
+                Convert.ToInt32(a[p2, 0]),
+                Convert.ToInt32(a[p2, 1])
+            );
+        }
+
+        // вывод фигуры на экран
         private void Draw_Kv()
         {
-            Init_kvadrat(); // инициализация матрицы тела
-            Init_matr_preob(k, l); // инициализация матрицы преобразования
+            ImageClear(); // очистка старого изображения фигуры
 
-            int[,] kv1 = Multiply_matr(kv, matr_sdv); // перемножение матриц
+            Init_figure(); // инициализация матрицы тела
 
-            Pen myPen = new Pen(Color.Blue, 2); // цвет линии и ширина
+            double[,] kv1 = IntToDouble(kv);
+
+            kv1 = Multiply_matr_double(kv1, Init_matr_scale(scale));
+            kv1 = Multiply_matr_double(kv1, Init_matr_rotate(angle));
+            kv1 = Multiply_matr_double(kv1, Init_matr_reflect(reflectX, reflectY));
+            kv1 = Multiply_matr_double(kv1, Init_matr_sdv_double(k, l));
+
+            Pen myPen = new Pen(Color.Blue, 2);
 
             Graphics g = Graphics.FromHwnd(pictureBox1.Handle);
 
-            // рисуем 1 сторону квадрата
-            g.DrawLine(myPen, kv1[0, 0], kv1[0, 1], kv1[1, 0], kv1[1, 1]);
+            if (currentFigure == 3)
+            {
+                // Вариант 3
+                DrawLineDouble(g, myPen, kv1, 0, 1);
+                DrawLineDouble(g, myPen, kv1, 0, 3);
+                DrawLineDouble(g, myPen, kv1, 1, 2);
+                DrawLineDouble(g, myPen, kv1, 2, 3);
+            }
 
-            // рисуем 2 сторону квадрата
-            g.DrawLine(myPen, kv1[1, 0], kv1[1, 1], kv1[2, 0], kv1[2, 1]);
+            if (currentFigure == 4)
+            {
+                // Вариант 4
+                DrawLineDouble(g, myPen, kv1, 0, 1);
+                DrawLineDouble(g, myPen, kv1, 1, 2);
+                DrawLineDouble(g, myPen, kv1, 2, 3);
+                DrawLineDouble(g, myPen, kv1, 3, 4);
+                DrawLineDouble(g, myPen, kv1, 4, 0);
+            }
 
-            // рисуем 3 сторону квадрата
-            g.DrawLine(myPen, kv1[2, 0], kv1[2, 1], kv1[3, 0], kv1[3, 1]);
+            if (currentFigure == 11)
+            {
+                // Вариант 11
+                DrawLineDouble(g, myPen, kv1, 0, 1);
+                DrawLineDouble(g, myPen, kv1, 1, 2);
+                DrawLineDouble(g, myPen, kv1, 2, 3);
+                DrawLineDouble(g, myPen, kv1, 3, 0);
+            }
 
-            // рисуем 4 сторону квадрата
-            g.DrawLine(myPen, kv1[3, 0], kv1[3, 1], kv1[0, 0], kv1[0, 1]);
+            if (currentFigure == 13)
+            {
+                // Вариант 13
+                DrawLineDouble(g, myPen, kv1, 0, 1);
+                DrawLineDouble(g, myPen, kv1, 1, 2);
+                DrawLineDouble(g, myPen, kv1, 2, 3);
+                DrawLineDouble(g, myPen, kv1, 3, 0);
+            }
 
             g.Dispose();
             myPen.Dispose();
+        }
+
+        // очистка поля рисования
+        private void ImageClear()
+        {
+            Graphics g = Graphics.FromHwnd(pictureBox1.Handle);
+            g.Clear(pictureBox1.BackColor);
+            g.Dispose();
         }
 
         // вывод осей на экран
@@ -139,21 +329,10 @@ namespace LR1T2
             Draw_osi();
         }
 
-        // кнопка "Нарисовать фигуру"
-        private void Draw_figure_Button_Click(object sender, EventArgs e)
-        {
-            k = pictureBox1.Width / 2;
-            l = pictureBox1.Height / 2;
-
-            Draw_Kv();
-        }
-
         // кнопка "Очистить"
         private void Сlear_Click(object sender, EventArgs e)
         {
-            Graphics g = Graphics.FromHwnd(pictureBox1.Handle);
-            g.Clear(pictureBox1.BackColor);
-            g.Dispose();
+            ImageClear();
         }
 
         // сдвиг вправо
@@ -207,9 +386,130 @@ namespace LR1T2
         // обработчик таймера
         private void timer1_Tick(object sender, EventArgs e)
         {
-            k++;
+            if (animationMode == 1)
+            {
+                k++;
+            }
+
+            if (animationMode == 2)
+            {
+                angle += 5;
+            }
+
+            if (animationMode == 3)
+            {
+                scale *= 1.02;
+            }
+
+            if (animationMode == 4)
+            {
+                scale *= 0.98;
+            }
+
             Draw_Kv();
             Thread.Sleep(100);
         }
+
+        // фигура вариант 3
+        private void Variant3_Button_Click(object sender, EventArgs e)
+        {
+            currentFigure = 3;
+            k = pictureBox1.Width / 2;
+            l = pictureBox1.Height / 2;
+            Draw_Kv();
+        }
+
+        // фигура вариант 4 
+        private void Variant4_Button_Click(object sender, EventArgs e)
+        {
+            currentFigure = 4;
+            k = pictureBox1.Width / 2;
+            l = pictureBox1.Height / 2;
+            Draw_Kv();
+        }
+
+        // фигура вариант 11
+        private void Variant11_Button_Click(object sender, EventArgs e)
+        {
+            currentFigure = 11;
+            k = pictureBox1.Width / 2;
+            l = pictureBox1.Height / 2;
+            Draw_Kv();
+        }
+
+        // фигура вариант 13
+        private void Variant13_Button_Click(object sender, EventArgs e)
+        {
+            currentFigure = 13;
+            k = pictureBox1.Width / 2;
+            l = pictureBox1.Height / 2;
+            Draw_Kv();
+        }
+
+        // отражение относительно OX
+        private void Reflect_OX_Button_Click(object sender, EventArgs e)
+        {
+            reflectY = -reflectY;
+            Draw_Kv();
+        }
+
+        // отражение относительно OY
+        private void Reflect_OY_Button_Click(object sender, EventArgs e)
+        {
+            reflectX = -reflectX;
+            Draw_Kv();
+        }
+
+        // масштабирование: увеличить
+        private void Scale_Up_Button_Click(object sender, EventArgs e)
+        {
+            scale *= 1.1;
+            Draw_Kv();
+        }
+
+        // масштабирование: уменьшить
+        private void Scale_Down_Button_Click(object sender, EventArgs e)
+        {
+            scale *= 0.9;
+            Draw_Kv();
+        }
+
+        // поворот вправо
+        private void Rotate_Right_Button_Click(object sender, EventArgs e)
+        {
+            angle += 10;
+            Draw_Kv();
+        }
+
+        // поворот влево
+        private void Rotate_Left_Button_Click(object sender, EventArgs e)
+        {
+            angle -= 10;
+            Draw_Kv();
+        }
+
+        private void Continuous_Shift_Button_Click(object sender, EventArgs e)
+        {
+            animationMode = 1;
+        }
+
+        private void Continuous_Rotate_Button_Click(object sender, EventArgs e)
+        {
+            animationMode = 2;
+        }
+
+        // непрерывное масштабирование: увеличить
+        private void Continuous_Scale_Up_Button_Click(object sender, EventArgs e)
+        {
+            animationMode = 3;
+        }
+
+        // непрерывное масштабирование: уменьшить
+        private void Continuous_Scale_Down_Button_Click(object sender, EventArgs e)
+        {
+            animationMode = 4;
+        }
+
+
     }
 }
