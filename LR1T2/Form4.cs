@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Drawing.Drawing2D;
 
 namespace LR1T2
 {
@@ -31,6 +32,13 @@ namespace LR1T2
         // 2 - поворот
         // 3 - масштабирование: увеличить
         // 4 - масштабирование: уменьшить
+
+        Color currentLineColor = Color.Blue; // цвет линии
+        bool thickLine = false; // толстая линия
+        bool dashedLine = false; // пунктирная линия
+        int lineWidth = 3; // толщина линии
+        int dashStep = 5; // шаг пунктира
+
         public Form4()
         {
             InitializeComponent();
@@ -40,6 +48,44 @@ namespace LR1T2
         {
             k = pictureBox1.Width / 2;
             l = pictureBox1.Height / 2;
+
+            comboBoxLineType.Items.Add("Сплошная");
+            comboBoxLineType.Items.Add("Пунктирная");
+            comboBoxLineType.SelectedIndex = 0;
+
+            numericUpDownDashStep.Minimum = 2;
+            numericUpDownDashStep.Maximum = 20;
+            numericUpDownDashStep.Value = 5;
+            numericUpDownDashStep.Enabled = false;
+
+            numericUpDownLineWidth.Minimum = 1;
+            numericUpDownLineWidth.Maximum = 10;
+            numericUpDownLineWidth.Value = 3;
+            numericUpDownLineWidth.Enabled = false;
+        }
+
+        private Pen CreateFigurePen()
+        {
+            int width = 1;
+
+            if (thickLine == true)
+            {
+                width = lineWidth;
+            }
+
+            Pen myPen = new Pen(currentLineColor, width);
+
+            if (dashedLine == true)
+            {
+                myPen.DashStyle = DashStyle.Custom;
+                myPen.DashPattern = new float[] { dashStep, dashStep };
+            }
+            else
+            {
+                myPen.DashStyle = DashStyle.Solid;
+            }
+
+            return myPen;
         }
 
         // инициализация матрицы тела
@@ -245,7 +291,7 @@ namespace LR1T2
             kv1 = Multiply_matr_double(kv1, Init_matr_reflect(reflectX, reflectY));
             kv1 = Multiply_matr_double(kv1, Init_matr_sdv_double(k, l));
 
-            Pen myPen = new Pen(Color.Blue, 2);
+            Pen myPen = CreateFigurePen();
 
             Graphics g = Graphics.FromHwnd(pictureBox1.Handle);
 
@@ -510,6 +556,56 @@ namespace LR1T2
             animationMode = 4;
         }
 
+        // выбор цвета линии
+        private void LineColor_Button_Click(object sender, EventArgs e)
+        {
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                currentLineColor = colorDialog1.Color;
+                Draw_Kv();
+            }
+        }
+
+        // толстая линия
+        private void ThickLine_CheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            thickLine = ThickLine_CheckBox.Checked;
+            numericUpDownLineWidth.Enabled = thickLine;
+
+            Draw_Kv();
+        }
+
+        // изменение толщины линии
+        private void numericUpDownLineWidth_ValueChanged(object sender, EventArgs e)
+        {
+            lineWidth = Convert.ToInt32(numericUpDownLineWidth.Value);
+            Draw_Kv();
+        }
+
+        // выбор типа линии
+        private void comboBoxLineType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBoxLineType.SelectedIndex == 0)
+            {
+                dashedLine = false;
+                numericUpDownDashStep.Enabled = false;
+            }
+
+            if (comboBoxLineType.SelectedIndex == 1)
+            {
+                dashedLine = true;
+                numericUpDownDashStep.Enabled = true;
+            }
+
+            Draw_Kv();
+        }
+
+        // изменение шага пунктира
+        private void numericUpDownDashStep_ValueChanged(object sender, EventArgs e)
+        {
+            dashStep = Convert.ToInt32(numericUpDownDashStep.Value);
+            Draw_Kv();
+        }
 
     }
 }

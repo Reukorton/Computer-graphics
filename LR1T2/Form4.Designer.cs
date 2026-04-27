@@ -33,7 +33,17 @@
             Start_Button = new Button();
             Draw_axes_Button = new Button();
             panel1 = new Panel();
+            groupBoxLineSettings = new GroupBox();
+            numericUpDownLineWidth = new NumericUpDown();
+            label3 = new Label();
+            LineColor_Button = new Button();
+            ThickLine_CheckBox = new CheckBox();
+            numericUpDownDashStep = new NumericUpDown();
+            label2 = new Label();
+            comboBoxLineType = new ComboBox();
+            label1 = new Label();
             groupBox4 = new GroupBox();
+            Continuous_Scale_Down_Button = new Button();
             Continuous_Scale_Up_Button = new Button();
             Continuous_Rotate_Button = new Button();
             Continuous_Shift_Button = new Button();
@@ -56,9 +66,12 @@
             Shift_Up_Button = new Button();
             Shift_Down_Button = new Button();
             timer1 = new System.Windows.Forms.Timer(components);
-            Continuous_Scale_Down_Button = new Button();
+            colorDialog1 = new ColorDialog();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             panel1.SuspendLayout();
+            groupBoxLineSettings.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownLineWidth).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDashStep).BeginInit();
             groupBox4.SuspendLayout();
             groupBox3.SuspendLayout();
             groupBox1.SuspendLayout();
@@ -100,6 +113,7 @@
             // panel1
             // 
             panel1.BorderStyle = BorderStyle.FixedSingle;
+            panel1.Controls.Add(groupBoxLineSettings);
             panel1.Controls.Add(groupBox4);
             panel1.Controls.Add(groupBox3);
             panel1.Controls.Add(groupBox1);
@@ -108,6 +122,106 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(390, 503);
             panel1.TabIndex = 2;
+            // 
+            // groupBoxLineSettings
+            // 
+            groupBoxLineSettings.BackColor = Color.Transparent;
+            groupBoxLineSettings.Controls.Add(numericUpDownLineWidth);
+            groupBoxLineSettings.Controls.Add(label3);
+            groupBoxLineSettings.Controls.Add(LineColor_Button);
+            groupBoxLineSettings.Controls.Add(ThickLine_CheckBox);
+            groupBoxLineSettings.Controls.Add(numericUpDownDashStep);
+            groupBoxLineSettings.Controls.Add(label2);
+            groupBoxLineSettings.Controls.Add(comboBoxLineType);
+            groupBoxLineSettings.Controls.Add(label1);
+            groupBoxLineSettings.Location = new Point(165, 216);
+            groupBoxLineSettings.Name = "groupBoxLineSettings";
+            groupBoxLineSettings.Size = new Size(224, 134);
+            groupBoxLineSettings.TabIndex = 19;
+            groupBoxLineSettings.TabStop = false;
+            groupBoxLineSettings.Text = "Настройка линии";
+            // 
+            // numericUpDownLineWidth
+            // 
+            numericUpDownLineWidth.Enabled = false;
+            numericUpDownLineWidth.Location = new Point(99, 74);
+            numericUpDownLineWidth.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
+            numericUpDownLineWidth.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDownLineWidth.Name = "numericUpDownLineWidth";
+            numericUpDownLineWidth.Size = new Size(101, 23);
+            numericUpDownLineWidth.TabIndex = 20;
+            numericUpDownLineWidth.Value = new decimal(new int[] { 3, 0, 0, 0 });
+            numericUpDownLineWidth.ValueChanged += numericUpDownLineWidth_ValueChanged;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(7, 76);
+            label3.Name = "label3";
+            label3.Size = new Size(59, 15);
+            label3.TabIndex = 7;
+            label3.Text = "Толщина";
+            // 
+            // LineColor_Button
+            // 
+            LineColor_Button.FlatStyle = FlatStyle.Popup;
+            LineColor_Button.Location = new Point(7, 101);
+            LineColor_Button.Name = "LineColor_Button";
+            LineColor_Button.Size = new Size(94, 23);
+            LineColor_Button.TabIndex = 6;
+            LineColor_Button.Text = "Выбор цвета";
+            LineColor_Button.UseVisualStyleBackColor = true;
+            LineColor_Button.Click += LineColor_Button_Click;
+            // 
+            // ThickLine_CheckBox
+            // 
+            ThickLine_CheckBox.AutoSize = true;
+            ThickLine_CheckBox.Location = new Point(107, 104);
+            ThickLine_CheckBox.Name = "ThickLine_CheckBox";
+            ThickLine_CheckBox.Size = new Size(107, 19);
+            ThickLine_CheckBox.TabIndex = 5;
+            ThickLine_CheckBox.Text = "Толстая линия";
+            ThickLine_CheckBox.UseVisualStyleBackColor = true;
+            ThickLine_CheckBox.CheckedChanged += ThickLine_CheckBox_CheckedChanged;
+            // 
+            // numericUpDownDashStep
+            // 
+            numericUpDownDashStep.Location = new Point(99, 45);
+            numericUpDownDashStep.Maximum = new decimal(new int[] { 20, 0, 0, 0 });
+            numericUpDownDashStep.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
+            numericUpDownDashStep.Name = "numericUpDownDashStep";
+            numericUpDownDashStep.Size = new Size(101, 23);
+            numericUpDownDashStep.TabIndex = 3;
+            numericUpDownDashStep.Value = new decimal(new int[] { 5, 0, 0, 0 });
+            numericUpDownDashStep.ValueChanged += numericUpDownDashStep_ValueChanged;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(7, 47);
+            label2.Name = "label2";
+            label2.Size = new Size(83, 15);
+            label2.TabIndex = 2;
+            label2.Text = "Шаг пунктира";
+            // 
+            // comboBoxLineType
+            // 
+            comboBoxLineType.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxLineType.FormattingEnabled = true;
+            comboBoxLineType.Location = new Point(79, 16);
+            comboBoxLineType.Name = "comboBoxLineType";
+            comboBoxLineType.Size = new Size(121, 23);
+            comboBoxLineType.TabIndex = 1;
+            comboBoxLineType.SelectedIndexChanged += comboBoxLineType_SelectedIndexChanged;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(7, 19);
+            label1.Name = "label1";
+            label1.Size = new Size(66, 15);
+            label1.TabIndex = 0;
+            label1.Text = "Тип линии";
             // 
             // groupBox4
             // 
@@ -127,6 +241,17 @@
             groupBox4.TabIndex = 14;
             groupBox4.TabStop = false;
             groupBox4.Text = "преобразования";
+            // 
+            // Continuous_Scale_Down_Button
+            // 
+            Continuous_Scale_Down_Button.FlatStyle = FlatStyle.Popup;
+            Continuous_Scale_Down_Button.Location = new Point(6, 306);
+            Continuous_Scale_Down_Button.Name = "Continuous_Scale_Down_Button";
+            Continuous_Scale_Down_Button.Size = new Size(124, 27);
+            Continuous_Scale_Down_Button.TabIndex = 12;
+            Continuous_Scale_Down_Button.Text = "Неп Уменьшить";
+            Continuous_Scale_Down_Button.UseVisualStyleBackColor = true;
+            Continuous_Scale_Down_Button.Click += Continuous_Scale_Down_Button_Click;
             // 
             // Continuous_Scale_Up_Button
             // 
@@ -367,17 +492,6 @@
             // 
             timer1.Tick += timer1_Tick;
             // 
-            // Continuous_Scale_Down_Button
-            // 
-            Continuous_Scale_Down_Button.FlatStyle = FlatStyle.Popup;
-            Continuous_Scale_Down_Button.Location = new Point(6, 306);
-            Continuous_Scale_Down_Button.Name = "Continuous_Scale_Down_Button";
-            Continuous_Scale_Down_Button.Size = new Size(124, 27);
-            Continuous_Scale_Down_Button.TabIndex = 12;
-            Continuous_Scale_Down_Button.Text = "Неп Уменьшить";
-            Continuous_Scale_Down_Button.UseVisualStyleBackColor = true;
-            Continuous_Scale_Down_Button.Click += Continuous_Scale_Down_Button_Click;
-            // 
             // Form4
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -387,8 +501,13 @@
             Controls.Add(pictureBox1);
             Name = "Form4";
             Text = "Form4";
+            Load += Form4_Load;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             panel1.ResumeLayout(false);
+            groupBoxLineSettings.ResumeLayout(false);
+            groupBoxLineSettings.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownLineWidth).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numericUpDownDashStep).EndInit();
             groupBox4.ResumeLayout(false);
             groupBox3.ResumeLayout(false);
             groupBox1.ResumeLayout(false);
@@ -426,5 +545,17 @@
         private Button Continuous_Rotate_Button;
         private Button Continuous_Scale_Up_Button;
         private Button Continuous_Scale_Down_Button;
+        private RadioButton ThinLine_RadioButton;
+        private Button LineColor_Button;
+        private NumericUpDown numericUpDownLineWidth;
+        private RadioButton ThickLine_RadioButton;
+        private GroupBox groupBoxLineSettings;
+        private NumericUpDown numericUpDownDashStep;
+        private Label label2;
+        private ComboBox comboBoxLineType;
+        private Label label1;
+        private CheckBox ThickLine_CheckBox;
+        private ColorDialog colorDialog1;
+        private Label label3;
     }
 }
