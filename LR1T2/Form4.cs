@@ -12,38 +12,116 @@ using System.Drawing.Drawing2D;
 
 namespace LR1T2
 {
+    /// <summary>
+    /// Форма лабораторной работы №3.
+    /// Реализует построение двумерных фигур, аффинные преобразования,
+    /// настройку цвета и стиля линии, а также переход к индивидуальному заданию.
+    /// </summary>
     public partial class Form4 : Form
     {
-        int[,] kv = new int[5, 3]; // матрица тела
-        int currentFigure = 3; // выбранная фигура
-        int[,] osi = new int[4, 3]; // матрица координат осей
-        int[,] matr_sdv = new int[3, 3]; // матрица преобразования
+        #region Глобальные переменные
 
-        int k, l; // элементы матрицы сдвига
-        bool f = true; // переменная для запуска и остановки движения
-        double angle = 0; // угол поворота
-        double scale = 1; // масштаб
+        /// <summary>
+        /// Матрица тела, содержащая координаты вершин фигуры в однородных координатах.
+        /// </summary>
+        int[,] kv = new int[5, 3];
 
-        int reflectX = 1; // отражение по X
-        int reflectY = 1; // отражение по Y
+        /// <summary>
+        /// Номер текущей выбранной фигуры.
+        /// </summary>
+        int currentFigure = 3;
 
+        /// <summary>
+        /// Матрица координатных осей.
+        /// </summary>
+        int[,] osi = new int[4, 3];
+
+        /// <summary>
+        /// Матрица преобразования сдвига.
+        /// </summary>
+        int[,] matr_sdv = new int[3, 3];
+
+        /// <summary>
+        /// Элементы матрицы сдвига.
+        /// Используются для перемещения фигуры по экрану.
+        /// </summary>
+        int k, l;
+
+        /// <summary>
+        /// Переменная для запуска и остановки непрерывного преобразования.
+        /// </summary>
+        bool f = true;
+
+        /// <summary>
+        /// Текущий угол поворота фигуры.
+        /// </summary>
+        double angle = 0;
+
+        /// <summary>
+        /// Текущий коэффициент масштабирования фигуры.
+        /// </summary>
+        double scale = 1;
+
+        /// <summary>
+        /// Коэффициент отражения по оси X.
+        /// </summary>
+        int reflectX = 1;
+
+        /// <summary>
+        /// Коэффициент отражения по оси Y.
+        /// </summary>
+        int reflectY = 1;
+
+        /// <summary>
+        /// Режим непрерывного преобразования:
+        /// 1 - смещение,
+        /// 2 - поворот,
+        /// 3 - увеличение,
+        /// 4 - уменьшение.
+        /// </summary>
         int animationMode = 1;
-        // 1 - смещение
-        // 2 - поворот
-        // 3 - масштабирование: увеличить
-        // 4 - масштабирование: уменьшить
 
-        Color currentLineColor = Color.Blue; // цвет линии
-        bool thickLine = false; // толстая линия
-        bool dashedLine = false; // пунктирная линия
-        int lineWidth = 3; // толщина линии
-        int dashStep = 5; // шаг пунктира
+        /// <summary>
+        /// Текущий цвет линии фигуры.
+        /// </summary>
+        Color currentLineColor = Color.Blue;
 
+        /// <summary>
+        /// Признак использования толстой линии.
+        /// </summary>
+        bool thickLine = false;
+
+        /// <summary>
+        /// Признак использования пунктирной линии.
+        /// </summary>
+        bool dashedLine = false;
+
+        /// <summary>
+        /// Толщина линии.
+        /// </summary>
+        int lineWidth = 3;
+
+        /// <summary>
+        /// Шаг пунктира.
+        /// </summary>
+        int dashStep = 5;
+
+        #endregion
+
+        /// <summary>
+        /// Конструктор формы.
+        /// </summary>
         public Form4()
         {
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Обработчик загрузки формы.
+        /// Задает начальное положение фигуры и начальные параметры настройки линии.
+        /// </summary>
+        /// <param name="sender">Объект, вызвавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
         private void Form4_Load(object sender, EventArgs e)
         {
             k = pictureBox1.Width / 2;
@@ -64,6 +142,11 @@ namespace LR1T2
             numericUpDownLineWidth.Enabled = false;
         }
 
+        /// <summary>
+        /// Создает перо для рисования фигуры с учетом выбранных параметров:
+        /// цвета, толщины, типа линии и шага пунктира.
+        /// </summary>
+        /// <returns>Перо для рисования фигуры.</returns>
         private Pen CreateFigurePen()
         {
             int width = 1;
@@ -88,21 +171,24 @@ namespace LR1T2
             return myPen;
         }
 
-        // инициализация матрицы тела
+        #region Инициализация фигур и матриц
+
+        /// <summary>
+        /// Инициализирует матрицу тела для текущей выбранной фигуры.
+        /// Координаты задаются в однородных координатах.
+        /// </summary>
         private void Init_figure()
         {
             if (currentFigure == 3)
             {
-                // Вариант 3
-                kv[0, 0] = -65; kv[0, 1] = -100; kv[0, 2] = 1; // верхняя левая
-                kv[1, 0] = 65; kv[1, 1] = -100; kv[1, 2] = 1; // верхняя правая
-                kv[2, 0] = -65; kv[2, 1] = 110; kv[2, 2] = 1; // нижняя левая
-                kv[3, 0] = 95; kv[3, 1] = 80; kv[3, 2] = 1; // нижняя правая
+                kv[0, 0] = -65; kv[0, 1] = -100; kv[0, 2] = 1;
+                kv[1, 0] = 65; kv[1, 1] = -100; kv[1, 2] = 1;
+                kv[2, 0] = -65; kv[2, 1] = 110; kv[2, 2] = 1;
+                kv[3, 0] = 95; kv[3, 1] = 80; kv[3, 2] = 1;
             }
 
             if (currentFigure == 4)
             {
-                // Вариант 4
                 kv[0, 0] = -70; kv[0, 1] = -100; kv[0, 2] = 1;
                 kv[1, 0] = 80; kv[1, 1] = -70; kv[1, 2] = 1;
                 kv[2, 0] = 10; kv[2, 1] = 0; kv[2, 2] = 1;
@@ -112,7 +198,6 @@ namespace LR1T2
 
             if (currentFigure == 11)
             {
-                // Вариант 11
                 kv[0, 0] = 0; kv[0, 1] = -90; kv[0, 2] = 1;
                 kv[1, 0] = 90; kv[1, 1] = 0; kv[1, 2] = 1;
                 kv[2, 0] = 0; kv[2, 1] = 90; kv[2, 2] = 1;
@@ -122,7 +207,6 @@ namespace LR1T2
 
             if (currentFigure == 13)
             {
-                // Вариант 13
                 kv[0, 0] = -80; kv[0, 1] = -90; kv[0, 2] = 1;
                 kv[1, 0] = -80; kv[1, 1] = 70; kv[1, 2] = 1;
                 kv[2, 0] = 40; kv[2, 1] = 100; kv[2, 2] = 1;
@@ -131,7 +215,11 @@ namespace LR1T2
             }
         }
 
-        // инициализация матрицы сдвига
+        /// <summary>
+        /// Инициализирует матрицу сдвига.
+        /// </summary>
+        /// <param name="k1">Сдвиг по оси X.</param>
+        /// <param name="l1">Сдвиг по оси Y.</param>
         private void Init_matr_preob(int k1, int l1)
         {
             matr_sdv[0, 0] = 1; matr_sdv[0, 1] = 0; matr_sdv[0, 2] = 0;
@@ -139,7 +227,9 @@ namespace LR1T2
             matr_sdv[2, 0] = k1; matr_sdv[2, 1] = l1; matr_sdv[2, 2] = 1;
         }
 
-        // инициализация матрицы осей
+        /// <summary>
+        /// Инициализирует матрицу координатных осей.
+        /// </summary>
         private void Init_osi()
         {
             osi[0, 0] = -200; osi[0, 1] = 0; osi[0, 2] = 1;
@@ -148,7 +238,12 @@ namespace LR1T2
             osi[3, 0] = 0; osi[3, 1] = -200; osi[3, 2] = 1;
         }
 
-        // умножение матриц
+        /// <summary>
+        /// Выполняет умножение двух целочисленных матриц.
+        /// </summary>
+        /// <param name="a">Первая матрица.</param>
+        /// <param name="b">Вторая матрица.</param>
+        /// <returns>Результат умножения матриц.</returns>
         private int[,] Multiply_matr(int[,] a, int[,] b)
         {
             int n = a.GetLength(0);
@@ -171,7 +266,12 @@ namespace LR1T2
 
             return r;
         }
-        // перевод int матрицы в double
+
+        /// <summary>
+        /// Переводит целочисленную матрицу в матрицу типа double.
+        /// </summary>
+        /// <param name="a">Исходная целочисленная матрица.</param>
+        /// <returns>Матрица типа double.</returns>
         private double[,] IntToDouble(int[,] a)
         {
             int n = a.GetLength(0);
@@ -190,7 +290,12 @@ namespace LR1T2
             return r;
         }
 
-        // умножение матриц double
+        /// <summary>
+        /// Выполняет умножение двух матриц типа double.
+        /// </summary>
+        /// <param name="a">Первая матрица.</param>
+        /// <param name="b">Вторая матрица.</param>
+        /// <returns>Результат умножения матриц.</returns>
         private double[,] Multiply_matr_double(double[,] a, double[,] b)
         {
             int n = a.GetLength(0);
@@ -215,7 +320,12 @@ namespace LR1T2
             return r;
         }
 
-        // матрица сдвига
+        /// <summary>
+        /// Создает матрицу сдвига типа double.
+        /// </summary>
+        /// <param name="k1">Сдвиг по оси X.</param>
+        /// <param name="l1">Сдвиг по оси Y.</param>
+        /// <returns>Матрица сдвига.</returns>
         private double[,] Init_matr_sdv_double(double k1, double l1)
         {
             double[,] m = new double[3, 3];
@@ -227,7 +337,11 @@ namespace LR1T2
             return m;
         }
 
-        // матрица масштабирования
+        /// <summary>
+        /// Создает матрицу масштабирования.
+        /// </summary>
+        /// <param name="s">Коэффициент масштабирования.</param>
+        /// <returns>Матрица масштабирования.</returns>
         private double[,] Init_matr_scale(double s)
         {
             double[,] m = new double[3, 3];
@@ -239,7 +353,11 @@ namespace LR1T2
             return m;
         }
 
-        // матрица поворота
+        /// <summary>
+        /// Создает матрицу поворота.
+        /// </summary>
+        /// <param name="angle">Угол поворота в градусах.</param>
+        /// <returns>Матрица поворота.</returns>
         private double[,] Init_matr_rotate(double angle)
         {
             double[,] m = new double[3, 3];
@@ -253,7 +371,12 @@ namespace LR1T2
             return m;
         }
 
-        // матрица отражения
+        /// <summary>
+        /// Создает матрицу отражения.
+        /// </summary>
+        /// <param name="rx">Коэффициент отражения по оси X.</param>
+        /// <param name="ry">Коэффициент отражения по оси Y.</param>
+        /// <returns>Матрица отражения.</returns>
         private double[,] Init_matr_reflect(int rx, int ry)
         {
             double[,] m = new double[3, 3];
@@ -265,7 +388,18 @@ namespace LR1T2
             return m;
         }
 
-        // рисование линии по double координатам
+        #endregion
+
+        #region Рисование
+
+        /// <summary>
+        /// Рисует отрезок между двумя точками матрицы координат типа double.
+        /// </summary>
+        /// <param name="g">Поверхность рисования.</param>
+        /// <param name="myPen">Перо для рисования.</param>
+        /// <param name="a">Матрица координат.</param>
+        /// <param name="p1">Индекс первой точки.</param>
+        /// <param name="p2">Индекс второй точки.</param>
         private void DrawLineDouble(Graphics g, Pen myPen, double[,] a, int p1, int p2)
         {
             g.DrawLine(
@@ -277,12 +411,15 @@ namespace LR1T2
             );
         }
 
-        // вывод фигуры на экран
+        /// <summary>
+        /// Очищает поле рисования и выводит текущую фигуру
+        /// с учетом выбранных преобразований.
+        /// </summary>
         private void Draw_Kv()
         {
-            ImageClear(); // очистка старого изображения фигуры
+            ImageClear();
 
-            Init_figure(); // инициализация матрицы тела
+            Init_figure();
 
             double[,] kv1 = IntToDouble(kv);
 
@@ -297,7 +434,6 @@ namespace LR1T2
 
             if (currentFigure == 3)
             {
-                // Вариант 3
                 DrawLineDouble(g, myPen, kv1, 0, 1);
                 DrawLineDouble(g, myPen, kv1, 0, 3);
                 DrawLineDouble(g, myPen, kv1, 1, 2);
@@ -306,7 +442,6 @@ namespace LR1T2
 
             if (currentFigure == 4)
             {
-                // Вариант 4
                 DrawLineDouble(g, myPen, kv1, 0, 1);
                 DrawLineDouble(g, myPen, kv1, 1, 2);
                 DrawLineDouble(g, myPen, kv1, 2, 3);
@@ -316,7 +451,6 @@ namespace LR1T2
 
             if (currentFigure == 11)
             {
-                // Вариант 11
                 DrawLineDouble(g, myPen, kv1, 0, 1);
                 DrawLineDouble(g, myPen, kv1, 1, 2);
                 DrawLineDouble(g, myPen, kv1, 2, 3);
@@ -325,7 +459,6 @@ namespace LR1T2
 
             if (currentFigure == 13)
             {
-                // Вариант 13
                 DrawLineDouble(g, myPen, kv1, 0, 1);
                 DrawLineDouble(g, myPen, kv1, 1, 2);
                 DrawLineDouble(g, myPen, kv1, 2, 3);
@@ -336,7 +469,9 @@ namespace LR1T2
             myPen.Dispose();
         }
 
-        // очистка поля рисования
+        /// <summary>
+        /// Очищает поле рисования.
+        /// </summary>
         private void ImageClear()
         {
             Graphics g = Graphics.FromHwnd(pictureBox1.Handle);
@@ -344,11 +479,13 @@ namespace LR1T2
             g.Dispose();
         }
 
-        // вывод осей на экран
+        /// <summary>
+        /// Выводит координатные оси в центре pictureBox.
+        /// </summary>
         private void Draw_osi()
         {
             Init_osi();
-            Init_matr_preob(k, l);
+            Init_matr_preob(pictureBox1.Width / 2, pictureBox1.Height / 2);
 
             int[,] osi1 = Multiply_matr(osi, matr_sdv);
 
@@ -356,17 +493,22 @@ namespace LR1T2
 
             Graphics g = Graphics.FromHwnd(pictureBox1.Handle);
 
-            // рисуем ось OX
             g.DrawLine(myPen, osi1[0, 0], osi1[0, 1], osi1[1, 0], osi1[1, 1]);
-
-            // рисуем ось OY
             g.DrawLine(myPen, osi1[2, 0], osi1[2, 1], osi1[3, 0], osi1[3, 1]);
 
             g.Dispose();
             myPen.Dispose();
         }
 
-        // кнопка "Нарисовать оси"
+        #endregion
+
+        #region Основные кнопки
+
+        /// <summary>
+        /// Обработчик кнопки вывода осей.
+        /// </summary>
+        /// <param name="sender">Объект, вызвавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
         private void Draw_axes_Button_Click(object sender, EventArgs e)
         {
             k = pictureBox1.Width / 2;
@@ -375,43 +517,21 @@ namespace LR1T2
             Draw_osi();
         }
 
-        // кнопка "Очистить"
+        /// <summary>
+        /// Обработчик кнопки очистки поля рисования.
+        /// </summary>
+        /// <param name="sender">Объект, вызвавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
         private void Сlear_Click(object sender, EventArgs e)
         {
             ImageClear();
         }
 
-        // сдвиг вправо
-        private void Shift_Right_Button_Click(object sender, EventArgs e)
-        {
-            k += 5;
-            Draw_Kv();
-        }
-
-        // сдвиг влево
-        private void Shift_Left_Button_Click(object sender, EventArgs e)
-        {
-            k -= 5;
-            Draw_Kv();
-        }
-
-        // сдвиг вниз
-        private void Shift_Down_Button_Click(object sender, EventArgs e)
-        {
-            l += 5;
-            Draw_Kv();
-        }
-
-        // сдвиг вверх
-        private void Shift_Up_Button_Click(object sender, EventArgs e)
-        {
-            {
-                l -= 5;
-                Draw_Kv();
-            }
-        }
-
-        // непрерывное перемещение
+        /// <summary>
+        /// Запускает или останавливает непрерывное преобразование фигуры.
+        /// </summary>
+        /// <param name="sender">Объект, вызвавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
         private void Start_Button_Click(object sender, EventArgs e)
         {
             timer1.Interval = 100;
@@ -429,7 +549,177 @@ namespace LR1T2
             f = !f;
         }
 
-        // обработчик таймера
+        #endregion
+
+        #region Сдвиг
+        /// <summary>
+        /// Выполняет дискретный сдвиг фигуры вправо.
+        /// </summary>
+        /// <param name="sender">Объект, вызвавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        private void Shift_Right_Button_Click(object sender, EventArgs e)
+        {
+            k += 5;
+            Draw_Kv();
+        }
+
+        /// <summary>
+        /// Выполняет дискретный сдвиг фигуры влево.
+        /// </summary>
+        /// <param name="sender">Объект, вызвавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        private void Shift_Left_Button_Click(object sender, EventArgs e)
+        {
+            k -= 5;
+            Draw_Kv();
+        }
+
+        /// <summary>
+        /// Выполняет дискретный сдвиг фигуры вниз.
+        /// </summary>
+        /// <param name="sender">Объект, вызвавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        private void Shift_Down_Button_Click(object sender, EventArgs e)
+        {
+            l += 5;
+            Draw_Kv();
+        }
+
+        /// <summary>
+        /// Выполняет дискретный сдвиг фигуры вверх.
+        /// </summary>
+        /// <param name="sender">Объект, вызвавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
+        private void Shift_Up_Button_Click(object sender, EventArgs e)
+        {
+            l -= 5;
+            Draw_Kv();
+        }
+
+        #endregion
+                    
+        /// <summary>
+        /// Выбирает фигуру, помещает ее в центр поля рисования
+        /// и сбрасывает основные преобразования.
+        /// </summary>
+        /// <param name="figureNumber">Номер выбранной фигуры.</param>
+        private void SelectFigure(int figureNumber)
+        {
+            currentFigure = figureNumber;
+
+            k = pictureBox1.Width / 2;
+            l = pictureBox1.Height / 2;
+
+            angle = 0;
+            scale = 1;
+            reflectX = 1;
+            reflectY = 1;
+
+            Draw_Kv();
+        }
+
+        #region Выбор фигур
+
+        /// <summary>
+        /// Выбирает фигуру варианта 3.
+        /// </summary>
+        private void Variant3_Button_Click(object sender, EventArgs e)
+        {
+            SelectFigure(3);
+        }
+
+        /// <summary>
+        /// Выбирает фигуру варианта 4.
+        /// </summary>
+        private void Variant4_Button_Click(object sender, EventArgs e)
+        {
+            SelectFigure(4);
+        }
+
+        /// <summary>
+        /// Выбирает фигуру варианта 11.
+        /// </summary>
+        private void Variant11_Button_Click(object sender, EventArgs e)
+        {
+            SelectFigure(11);
+        }
+
+        /// <summary>
+        /// Выбирает фигуру варианта 13.
+        /// </summary>
+        private void Variant13_Button_Click(object sender, EventArgs e)
+        {
+            SelectFigure(13);
+        }
+
+        #endregion
+
+        #region Преобразования
+
+        /// <summary>
+        /// Выполняет отражение фигуры относительно оси OX.
+        /// </summary>
+        private void Reflect_OX_Button_Click(object sender, EventArgs e)
+        {
+            reflectY = -reflectY;
+            Draw_Kv();
+        }
+
+        /// <summary>
+        /// Выполняет отражение фигуры относительно оси OY.
+        /// </summary>
+        private void Reflect_OY_Button_Click(object sender, EventArgs e)
+        {
+            reflectX = -reflectX;
+            Draw_Kv();
+        }
+
+        /// <summary>
+        /// Увеличивает масштаб фигуры.
+        /// </summary>
+        private void Scale_Up_Button_Click(object sender, EventArgs e)
+        {
+            scale *= 1.1;
+            Draw_Kv();
+        }
+
+        /// <summary>
+        /// Уменьшает масштаб фигуры.
+        /// </summary>
+        private void Scale_Down_Button_Click(object sender, EventArgs e)
+        {
+            scale *= 0.9;
+            Draw_Kv();
+        }
+
+        /// <summary>
+        /// Поворачивает фигуру вправо.
+        /// </summary>
+        private void Rotate_Right_Button_Click(object sender, EventArgs e)
+        {
+            angle += 10;
+            Draw_Kv();
+        }
+
+        /// <summary>
+        /// Поворачивает фигуру влево.
+        /// </summary>
+        private void Rotate_Left_Button_Click(object sender, EventArgs e)
+        {
+            angle -= 10;
+            Draw_Kv();
+        }
+
+        #endregion
+
+    #region Непрерывные преобразования
+
+        /// <summary>
+        /// Обработчик таймера.
+        /// Выполняет выбранное непрерывное преобразование фигуры.
+        /// </summary>
+        /// <param name="sender">Объект, вызвавший событие.</param>
+        /// <param name="e">Аргументы события.</param>
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (animationMode == 1)
@@ -456,107 +746,44 @@ namespace LR1T2
             Thread.Sleep(100);
         }
 
-        // фигура вариант 3
-        private void Variant3_Button_Click(object sender, EventArgs e)
-        {
-            currentFigure = 3;
-            k = pictureBox1.Width / 2;
-            l = pictureBox1.Height / 2;
-            Draw_Kv();
-        }
-
-        // фигура вариант 4 
-        private void Variant4_Button_Click(object sender, EventArgs e)
-        {
-            currentFigure = 4;
-            k = pictureBox1.Width / 2;
-            l = pictureBox1.Height / 2;
-            Draw_Kv();
-        }
-
-        // фигура вариант 11
-        private void Variant11_Button_Click(object sender, EventArgs e)
-        {
-            currentFigure = 11;
-            k = pictureBox1.Width / 2;
-            l = pictureBox1.Height / 2;
-            Draw_Kv();
-        }
-
-        // фигура вариант 13
-        private void Variant13_Button_Click(object sender, EventArgs e)
-        {
-            currentFigure = 13;
-            k = pictureBox1.Width / 2;
-            l = pictureBox1.Height / 2;
-            Draw_Kv();
-        }
-
-        // отражение относительно OX
-        private void Reflect_OX_Button_Click(object sender, EventArgs e)
-        {
-            reflectY = -reflectY;
-            Draw_Kv();
-        }
-
-        // отражение относительно OY
-        private void Reflect_OY_Button_Click(object sender, EventArgs e)
-        {
-            reflectX = -reflectX;
-            Draw_Kv();
-        }
-
-        // масштабирование: увеличить
-        private void Scale_Up_Button_Click(object sender, EventArgs e)
-        {
-            scale *= 1.1;
-            Draw_Kv();
-        }
-
-        // масштабирование: уменьшить
-        private void Scale_Down_Button_Click(object sender, EventArgs e)
-        {
-            scale *= 0.9;
-            Draw_Kv();
-        }
-
-        // поворот вправо
-        private void Rotate_Right_Button_Click(object sender, EventArgs e)
-        {
-            angle += 10;
-            Draw_Kv();
-        }
-
-        // поворот влево
-        private void Rotate_Left_Button_Click(object sender, EventArgs e)
-        {
-            angle -= 10;
-            Draw_Kv();
-        }
-
+        /// <summary>
+        /// Выбирает режим непрерывного сдвига.
+        /// </summary>
         private void Continuous_Shift_Button_Click(object sender, EventArgs e)
         {
             animationMode = 1;
         }
 
+        /// <summary>
+        /// Выбирает режим непрерывного поворота.
+        /// </summary>
         private void Continuous_Rotate_Button_Click(object sender, EventArgs e)
         {
             animationMode = 2;
         }
 
-        // непрерывное масштабирование: увеличить
+        /// <summary>
+        /// Выбирает режим непрерывного увеличения.
+        /// </summary>
         private void Continuous_Scale_Up_Button_Click(object sender, EventArgs e)
         {
             animationMode = 3;
         }
 
-        // непрерывное масштабирование: уменьшить
+        /// <summary>
+        /// Выбирает режим непрерывного уменьшения.
+        /// </summary>
         private void Continuous_Scale_Down_Button_Click(object sender, EventArgs e)
         {
             animationMode = 4;
         }
 
-        // выбор цвета линии
+        #endregion
+
+        #region Настройка линии
+        /// <summary>
+        /// Обработчик выбора цвета линии фигуры.
+        /// </summary>
         private void LineColor_Button_Click(object sender, EventArgs e)
         {
             if (colorDialog1.ShowDialog() == DialogResult.OK)
@@ -566,7 +793,9 @@ namespace LR1T2
             }
         }
 
-        // толстая линия
+        /// <summary>
+        /// Обработчик выбора толстой линии.
+        /// </summary>
         private void ThickLine_CheckBox_CheckedChanged(object sender, EventArgs e)
         {
             thickLine = ThickLine_CheckBox.Checked;
@@ -575,14 +804,18 @@ namespace LR1T2
             Draw_Kv();
         }
 
-        // изменение толщины линии
+        /// <summary>
+        /// Обработчик изменения толщины линии.
+        /// </summary>
         private void numericUpDownLineWidth_ValueChanged(object sender, EventArgs e)
         {
             lineWidth = Convert.ToInt32(numericUpDownLineWidth.Value);
             Draw_Kv();
         }
 
-        // выбор типа линии
+        /// <summary>
+        /// Обработчик выбора типа линии.
+        /// </summary>
         private void comboBoxLineType_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBoxLineType.SelectedIndex == 0)
@@ -600,12 +833,29 @@ namespace LR1T2
             Draw_Kv();
         }
 
-        // изменение шага пунктира
+        /// <summary>
+        /// Обработчик изменения шага пунктира.
+        /// </summary>
         private void numericUpDownDashStep_ValueChanged(object sender, EventArgs e)
         {
             dashStep = Convert.ToInt32(numericUpDownDashStep.Value);
             Draw_Kv();
         }
 
+        #endregion
+
+        /// <summary>
+        /// Открывает форму индивидуального задания с вращением
+        /// правильного треугольника и пятиугольника.
+        /// </summary>
+        private void Task3_Click(object sender, EventArgs e)
+        {
+            using (Form5 form5 = new Form5())
+            {
+                this.Hide();
+                form5.ShowDialog();
+                this.Show();
+            }
+        }
     }
 }

@@ -33,6 +33,7 @@
             Start_Button = new Button();
             Draw_axes_Button = new Button();
             panel1 = new Panel();
+            Task3 = new Button();
             groupBoxLineSettings = new GroupBox();
             numericUpDownLineWidth = new NumericUpDown();
             label3 = new Label();
@@ -113,6 +114,7 @@
             // panel1
             // 
             panel1.BorderStyle = BorderStyle.FixedSingle;
+            panel1.Controls.Add(Task3);
             panel1.Controls.Add(groupBoxLineSettings);
             panel1.Controls.Add(groupBox4);
             panel1.Controls.Add(groupBox3);
@@ -122,6 +124,16 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(390, 503);
             panel1.TabIndex = 2;
+            // 
+            // Task3
+            // 
+            Task3.Location = new Point(145, 292);
+            Task3.Name = "Task3";
+            Task3.Size = new Size(224, 23);
+            Task3.TabIndex = 20;
+            Task3.Text = "Задание 3";
+            Task3.UseVisualStyleBackColor = true;
+            Task3.Click += Task3_Click;
             // 
             // groupBoxLineSettings
             // 
@@ -134,7 +146,7 @@
             groupBoxLineSettings.Controls.Add(label2);
             groupBoxLineSettings.Controls.Add(comboBoxLineType);
             groupBoxLineSettings.Controls.Add(label1);
-            groupBoxLineSettings.Location = new Point(165, 216);
+            groupBoxLineSettings.Location = new Point(145, 152);
             groupBoxLineSettings.Name = "groupBoxLineSettings";
             groupBoxLineSettings.Size = new Size(224, 134);
             groupBoxLineSettings.TabIndex = 19;
@@ -557,5 +569,6 @@
         private CheckBox ThickLine_CheckBox;
         private ColorDialog colorDialog1;
         private Label label3;
+        private Button Task3;
     }
 }
