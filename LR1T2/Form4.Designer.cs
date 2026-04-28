@@ -33,6 +33,7 @@
             Start_Button = new Button();
             Draw_axes_Button = new Button();
             panel1 = new Panel();
+            Button_treygolniki = new Button();
             button1 = new Button();
             Task3 = new Button();
             groupBoxLineSettings = new GroupBox();
@@ -115,6 +116,7 @@
             // panel1
             // 
             panel1.BorderStyle = BorderStyle.FixedSingle;
+            panel1.Controls.Add(Button_treygolniki);
             panel1.Controls.Add(button1);
             panel1.Controls.Add(Task3);
             panel1.Controls.Add(groupBoxLineSettings);
@@ -127,11 +129,22 @@
             panel1.Size = new Size(390, 503);
             panel1.TabIndex = 2;
             // 
+            // Button_treygolniki
+            // 
+            Button_treygolniki.Location = new Point(145, 356);
+            Button_treygolniki.Name = "Button_treygolniki";
+            Button_treygolniki.Size = new Size(224, 27);
+            Button_treygolniki.TabIndex = 22;
+            Button_treygolniki.Text = "Вращающиеся треугольники";
+            Button_treygolniki.UseVisualStyleBackColor = true;
+            Button_treygolniki.Click += Button_treygolniki_Click;
+            Button_treygolniki.KeyDown += Button_treygolniki_KeyDown;
+            // 
             // button1
             // 
             button1.Location = new Point(145, 325);
             button1.Name = "button1";
-            button1.Size = new Size(217, 23);
+            button1.Size = new Size(224, 25);
             button1.TabIndex = 21;
             button1.Text = "Старт ракет";
             button1.UseVisualStyleBackColor = true;
@@ -583,5 +596,6 @@
         private Label label3;
         private Button Task3;
         private Button button1;
+        private Button Button_treygolniki;
     }
 }

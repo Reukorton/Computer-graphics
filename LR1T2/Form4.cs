@@ -39,6 +39,24 @@ namespace LR1T2
         private Color earthFillColor = Color.LightBlue;
         private Color ship1Color = Color.Red;
         private Color ship2Color = Color.Green;
+        // Матрицы координат для двух треугольников (3 вершины + 1 для однородных координат)
+        private double[,] tri1 = new double[3, 3];
+        private double[,] tri2 = new double[3, 3];
+
+        // Параметры 1 треугольника
+        private double angle1 = 0;
+        private double speed1 = 5;      // Начальная скорость вращения (градусы)
+        private double scale1 = 2.0;    // Начальный масштаб (большой)
+        private double scaleStep1 = -0.02; // Шаг изменения масштаба (уменьшение)
+
+        // Параметры 2 треугольника
+        private double angle2 = 0;
+        private double speed2 = -3;     // Начальная скорость (в обратную сторону)
+        private double scale2 = 0.5;    // Начальный масштаб (маленький)
+        private double scaleStep2 = 0.02; // Шаг изменения масштаба (увеличение)
+
+        // Таймер для задания
+        private System.Windows.Forms.Timer? taskTimer;
         #region Глобальные переменные
 
         /// <summary>
@@ -546,7 +564,14 @@ namespace LR1T2
         /// <param name="e">Аргументы события.</param>
         private void Сlear_Click(object sender, EventArgs e)
         {
+            // Останавливаем таймер, чтобы треугольники перестали перерисовываться
+            taskTimer?.Stop();
+
+            // Вызываем вашу функцию очистки
             ImageClear();
+
+            // Убираем изображение из pictureBox, чтобы экран стал пустым
+            pictureBox1.Image = null;
         }
 
         /// <summary>
@@ -1081,6 +1106,107 @@ namespace LR1T2
         private void button1_Click(object sender, EventArgs e)
         {
             StartStopSpaceAnimation();
+        }
+
+        private void Button_treygolniki_Click(object sender, EventArgs e)
+        {
+            // Устанавливаем, чтобы воспринимались клавиши
+            this.KeyPreview = true;
+
+            // Инициализация геометрии правильных треугольников (радиус 80)
+            double R = 80;
+            double cos30 = Math.Cos(30 * Math.PI / 180);
+            double sin30 = Math.Sin(30 * Math.PI / 180);
+
+            // Вершины треугольника относительно центра (0,0)
+            // Точка 1 (верх), Точка 2 (право-низ), Точка 3 (лево-низ)
+            tri1[0, 0] = 0; tri1[0, 1] = -R; tri1[0, 2] = 1;
+            tri1[1, 0] = R * cos30; tri1[1, 1] = R * sin30; tri1[1, 2] = 1;
+            tri1[2, 0] = -R * cos30; tri1[2, 1] = R * sin30; tri1[2, 2] = 1;
+
+            // Второй треугольник такой же (копия)
+            for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) tri2[i, j] = tri1[i, j];
+
+            // Настройка и запуск таймера
+            if (taskTimer == null)
+            {
+                taskTimer = new System.Windows.Forms.Timer();
+                taskTimer.Interval = 40;
+                taskTimer.Tick += (s, ev) => TaskTimer_Tick();
+            }
+            taskTimer.Start();
+        }
+        private void TaskTimer_Tick()
+        {
+            // Обновление вращения
+            angle1 += speed1;
+            angle2 += speed2;
+
+            // Обновление масштаба 1 (Пульсация)
+            scale1 += scaleStep1;
+            if (scale1 > 2.0 || scale1 < 0.5) scaleStep1 = -scaleStep1;
+
+            // Обновление масштаба 2 (Пульсация)
+            scale2 += scaleStep2;
+            if (scale2 > 2.0 || scale2 < 0.5) scaleStep2 = -scaleStep2;
+
+            DrawTriangles();
+        }
+        private void DrawTriangles()
+        {
+            if (pictureBox1.Width <= 0 || pictureBox1.Height <= 0) return;
+
+            Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.Clear(Color.White);
+
+                // Центр экрана
+                int cx = pictureBox1.Width / 2;
+                int cy = pictureBox1.Height / 2;
+
+                // Обработка первого треугольника 
+                double[,] m1 = tri1;
+                m1 = Multiply_matr_double(m1, Init_matr_scale(scale1));
+                m1 = Multiply_matr_double(m1, Init_matr_rotate(angle1));
+                m1 = Multiply_matr_double(m1, Init_matr_sdv_double(cx, cy));
+
+                using (Pen pen1 = new Pen(Color.Blue, 2))
+                {
+                    DrawLineDouble(g, pen1, m1, 0, 1);
+                    DrawLineDouble(g, pen1, m1, 1, 2);
+                    DrawLineDouble(g, pen1, m1, 2, 0);
+                }
+
+                //  Обработка второго треугольника 
+                double[,] m2 = tri2;
+                m2 = Multiply_matr_double(m2, Init_matr_scale(scale2));
+                m2 = Multiply_matr_double(m2, Init_matr_rotate(angle2));
+                m2 = Multiply_matr_double(m2, Init_matr_sdv_double(cx, cy));
+
+                using (Pen pen2 = new Pen(Color.Red, 2))
+                {
+                    DrawLineDouble(g, pen2, m2, 0, 1);
+                    DrawLineDouble(g, pen2, m2, 1, 2);
+                    DrawLineDouble(g, pen2, m2, 2, 0);
+                }
+            }
+
+            pictureBox1.Image = bmp;
+        }
+
+        private void Button_treygolniki_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Управление первым треугольником
+            if (e.KeyCode == Keys.W) speed1 += 0.5;
+            if (e.KeyCode == Keys.S) speed1 -= 0.5;
+            if (e.KeyCode == Keys.R) speed1 = -speed1; // Реверс
+
+            // Управление вторым треугольником
+            if (e.KeyCode == Keys.Up) speed2 += 0.5;
+            if (e.KeyCode == Keys.Down) speed2 -= 0.5;
+            if (e.KeyCode == Keys.Enter) speed2 = -speed2; // Реверс
         }
     }
 }
