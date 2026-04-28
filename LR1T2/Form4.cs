@@ -556,7 +556,19 @@ namespace LR1T2
         /// <param name="e">Аргументы события.</param>
         private void Start_Button_Click(object sender, EventArgs e)
         {
-            StartStopSpaceAnimation();
+            timer1.Interval = 100;
+
+            Start_Button.Text = "Стоп";
+
+            if (f == true)
+                timer1.Start();
+            else
+            {
+                timer1.Stop();
+                Start_Button.Text = "Старт";
+            }
+
+            f = !f;
         }
 
         #endregion
@@ -607,7 +619,7 @@ namespace LR1T2
         }
 
         #endregion
-                    
+
         /// <summary>
         /// Выбирает фигуру, помещает ее в центр поля рисования
         /// и сбрасывает основные преобразования.
@@ -722,7 +734,7 @@ namespace LR1T2
 
         #endregion
 
-    #region Непрерывные преобразования
+        #region Непрерывные преобразования
 
         /// <summary>
         /// Обработчик таймера.
@@ -1064,6 +1076,11 @@ namespace LR1T2
             }
 
             return result;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            StartStopSpaceAnimation();
         }
     }
 }
