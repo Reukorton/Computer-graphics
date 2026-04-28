@@ -18,7 +18,27 @@ namespace LR1T2
     /// настройку цвета и стиля линии, а также переход к индивидуальному заданию.
     /// </summary>
     public partial class Form4 : Form
+
     {
+        private System.Windows.Forms.Timer? spaceTimer;
+        private bool spaceAnimationStarted = false;
+
+        private double shipAngle1 = 0;
+        private double shipAngle2 = Math.PI;
+
+        private double shipSpeed1 = 0.045;
+        private double shipSpeed2 = -0.028;
+
+        private int spaceCenterX;
+        private int spaceCenterY;
+        private int orbitRadius;
+
+        private Color spaceBackColor = Color.White;
+        private Color orbitColor = Color.LightGray;
+        private Color earthBorderColor = Color.DarkBlue;
+        private Color earthFillColor = Color.LightBlue;
+        private Color ship1Color = Color.Red;
+        private Color ship2Color = Color.Green;
         #region Глобальные переменные
 
         /// <summary>
@@ -114,6 +134,8 @@ namespace LR1T2
         public Form4()
         {
             InitializeComponent();
+
+            InitSpaceScene();
         }
 
         /// <summary>
@@ -534,19 +556,7 @@ namespace LR1T2
         /// <param name="e">Аргументы события.</param>
         private void Start_Button_Click(object sender, EventArgs e)
         {
-            timer1.Interval = 100;
-
-            Start_Button.Text = "Стоп";
-
-            if (f == true)
-                timer1.Start();
-            else
-            {
-                timer1.Stop();
-                Start_Button.Text = "Старт";
-            }
-
-            f = !f;
+            StartStopSpaceAnimation();
         }
 
         #endregion
@@ -856,6 +866,204 @@ namespace LR1T2
                 form5.ShowDialog();
                 this.Show();
             }
+        }
+        private void InitSpaceScene()
+        {
+            if (pictureBox1.Width <= 0 || pictureBox1.Height <= 0)
+                return;
+
+            spaceCenterX = pictureBox1.Width / 2;
+            spaceCenterY = pictureBox1.Height / 2;
+            orbitRadius = Math.Min(pictureBox1.Width, pictureBox1.Height) / 3;
+
+            spaceTimer = new System.Windows.Forms.Timer();
+            spaceTimer.Interval = 40;
+            spaceTimer.Tick += SpaceTimer_Tick;
+
+            DrawSpaceScene();
+        }
+
+        private void StartStopSpaceAnimation()
+        {
+            if (spaceTimer == null)
+                InitSpaceScene();
+
+            if (spaceTimer == null)
+                return;
+
+            if (spaceAnimationStarted == false)
+            {
+                spaceTimer.Start();
+                spaceAnimationStarted = true;
+
+                // Если твоя кнопка называется не buttonStart,
+                // замени buttonStart на настоящее имя кнопки Старт.
+                Start_Button.Text = "Стоп";
+            }
+            else
+            {
+                spaceTimer.Stop();
+                spaceAnimationStarted = false;
+
+                // Если твоя кнопка называется не buttonStart,
+                // замени buttonStart на настоящее имя кнопки Старт.
+                Start_Button.Text = "Старт";
+            }
+        }
+
+        private void SpaceTimer_Tick(object? sender, EventArgs e)
+        {
+            shipAngle1 += shipSpeed1;
+            shipAngle2 += shipSpeed2;
+
+            if (shipAngle1 > 2 * Math.PI)
+                shipAngle1 -= 2 * Math.PI;
+
+            if (shipAngle2 < -2 * Math.PI)
+                shipAngle2 += 2 * Math.PI;
+
+            DrawSpaceScene();
+        }
+
+        private void DrawSpaceScene()
+        {
+            Bitmap bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+
+            spaceCenterX = pictureBox1.Width / 2;
+            spaceCenterY = pictureBox1.Height / 2;
+            orbitRadius = Math.Min(pictureBox1.Width, pictureBox1.Height) / 3;
+
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.Clear(spaceBackColor);
+            }
+
+            DrawOrbit(bmp, spaceCenterX, spaceCenterY, orbitRadius);
+            DrawEarth(bmp, spaceCenterX, spaceCenterY, orbitRadius / 4);
+
+            int x1 = spaceCenterX + (int)(orbitRadius * Math.Cos(shipAngle1));
+            int y1 = spaceCenterY + (int)(orbitRadius * Math.Sin(shipAngle1));
+
+            int x2 = spaceCenterX + (int)(orbitRadius * Math.Cos(shipAngle2));
+            int y2 = spaceCenterY + (int)(orbitRadius * Math.Sin(shipAngle2));
+
+            DrawShip(bmp, x1, y1, shipAngle1 + Math.PI / 2, y1, ship1Color);
+            DrawShip(bmp, x2, y2, shipAngle2 - Math.PI / 2, y2, ship2Color);
+
+            pictureBox1.Image = bmp;
+            pictureBox1.Refresh();
+        }
+
+        private void DrawEarth(Bitmap bmp, int centerX, int centerY, int radius)
+        {
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                using (SolidBrush brush = new SolidBrush(earthFillColor))
+                using (Pen pen = new Pen(earthBorderColor, 2))
+                {
+                    g.FillEllipse(brush, centerX - radius, centerY - radius, radius * 2, radius * 2);
+                    g.DrawEllipse(pen, centerX - radius, centerY - radius, radius * 2, radius * 2);
+                }
+
+                using (Pen pen = new Pen(Color.DarkCyan, 1))
+                {
+                    g.DrawArc(pen, centerX - radius / 2, centerY - radius, radius, radius * 2, 90, 180);
+                    g.DrawArc(pen, centerX - radius / 2, centerY - radius, radius, radius * 2, -90, 180);
+                    g.DrawLine(pen, centerX - radius, centerY, centerX + radius, centerY);
+                }
+            }
+        }
+
+        private void DrawOrbit(Bitmap bmp, int centerX, int centerY, int radius)
+        {
+            using (Graphics g = Graphics.FromImage(bmp))
+            using (Pen pen = new Pen(orbitColor, 1))
+            {
+                g.DrawEllipse(pen, centerX - radius, centerY - radius, radius * 2, radius * 2);
+            }
+        }
+
+        private void DrawShip(Bitmap bmp, int x, int y, double angle, int currentY, Color color)
+        {
+            double t = (double)(spaceCenterY + orbitRadius - currentY) / (2.0 * orbitRadius);
+
+            if (t < 0) t = 0;
+            if (t > 1) t = 1;
+
+            double scale = 0.6 + t * 1.0;
+
+            PointF[] body =
+            {
+        new PointF(16, 0),
+        new PointF(-10, -8),
+        new PointF(-6, 0),
+        new PointF(-10, 8)
+    };
+
+            PointF[] leftWing =
+            {
+        new PointF(-4, -5),
+        new PointF(-18, -14),
+        new PointF(-10, -2)
+    };
+
+            PointF[] rightWing =
+            {
+        new PointF(-4, 5),
+        new PointF(-18, 14),
+        new PointF(-10, 2)
+    };
+
+            PointF[] flame =
+            {
+        new PointF(-8, -4),
+        new PointF(-20, 0),
+        new PointF(-8, 4)
+    };
+
+            Point[] bodyScreen = TransformPoints(body, x, y, angle, scale);
+            Point[] leftWingScreen = TransformPoints(leftWing, x, y, angle, scale);
+            Point[] rightWingScreen = TransformPoints(rightWing, x, y, angle, scale);
+            Point[] flameScreen = TransformPoints(flame, x, y, angle, scale);
+
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(60, color)))
+                using (Pen pen = new Pen(color, 2))
+                using (Pen flamePen = new Pen(Color.Orange, 1))
+                {
+                    g.FillPolygon(brush, bodyScreen);
+                    g.DrawPolygon(pen, bodyScreen);
+
+                    g.DrawPolygon(pen, leftWingScreen);
+                    g.DrawPolygon(pen, rightWingScreen);
+
+                    g.DrawPolygon(flamePen, flameScreen);
+                }
+            }
+        }
+
+        private Point[] TransformPoints(PointF[] sourcePoints, int dx, int dy, double angle, double scale)
+        {
+            Point[] result = new Point[sourcePoints.Length];
+
+            double cosA = Math.Cos(angle);
+            double sinA = Math.Sin(angle);
+
+            for (int i = 0; i < sourcePoints.Length; i++)
+            {
+                double xs = sourcePoints[i].X * scale;
+                double ys = sourcePoints[i].Y * scale;
+
+                double xr = xs * cosA - ys * sinA;
+                double yr = xs * sinA + ys * cosA;
+
+                result[i] = new Point(
+                    dx + (int)Math.Round(xr),
+                    dy + (int)Math.Round(yr));
+            }
+
+            return result;
         }
     }
 }
