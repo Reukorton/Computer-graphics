@@ -70,6 +70,7 @@
             Shift_Down_Button = new Button();
             timer1 = new System.Windows.Forms.Timer(components);
             colorDialog1 = new ColorDialog();
+            GoTrain_Button = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             panel1.SuspendLayout();
             groupBoxLineSettings.SuspendLayout();
@@ -116,6 +117,7 @@
             // panel1
             // 
             panel1.BorderStyle = BorderStyle.FixedSingle;
+            panel1.Controls.Add(GoTrain_Button);
             panel1.Controls.Add(Button_treygolniki);
             panel1.Controls.Add(button1);
             panel1.Controls.Add(Task3);
@@ -195,7 +197,7 @@
             label3.AutoSize = true;
             label3.Location = new Point(7, 76);
             label3.Name = "label3";
-            label3.Size = new Size(58, 15);
+            label3.Size = new Size(59, 15);
             label3.TabIndex = 7;
             label3.Text = "Толщина";
             // 
@@ -215,7 +217,7 @@
             ThickLine_CheckBox.AutoSize = true;
             ThickLine_CheckBox.Location = new Point(107, 104);
             ThickLine_CheckBox.Name = "ThickLine_CheckBox";
-            ThickLine_CheckBox.Size = new Size(106, 19);
+            ThickLine_CheckBox.Size = new Size(107, 19);
             ThickLine_CheckBox.TabIndex = 5;
             ThickLine_CheckBox.Text = "Толстая линия";
             ThickLine_CheckBox.UseVisualStyleBackColor = true;
@@ -256,7 +258,7 @@
             label1.AutoSize = true;
             label1.Location = new Point(7, 19);
             label1.Name = "label1";
-            label1.Size = new Size(65, 15);
+            label1.Size = new Size(66, 15);
             label1.TabIndex = 0;
             label1.Text = "Тип линии";
             // 
@@ -529,6 +531,16 @@
             // 
             timer1.Tick += timer1_Tick;
             // 
+            // GoTrain_Button
+            // 
+            GoTrain_Button.Location = new Point(145, 389);
+            GoTrain_Button.Name = "GoTrain_Button";
+            GoTrain_Button.Size = new Size(224, 27);
+            GoTrain_Button.TabIndex = 23;
+            GoTrain_Button.Text = "Поезд поехал (13 задание)";
+            GoTrain_Button.UseVisualStyleBackColor = true;
+            GoTrain_Button.Click += GoTrain_Button_Click;
+            // 
             // Form4
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -597,5 +609,6 @@
         private Button Task3;
         private Button button1;
         private Button Button_treygolniki;
+        private Button GoTrain_Button;
     }
 }

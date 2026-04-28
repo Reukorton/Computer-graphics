@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using static System.Windows.Forms.DataFormats;
 
 namespace LR1T2
 {
@@ -1207,6 +1208,14 @@ namespace LR1T2
             if (e.KeyCode == Keys.Up) speed2 += 0.5;
             if (e.KeyCode == Keys.Down) speed2 -= 0.5;
             if (e.KeyCode == Keys.Enter) speed2 = -speed2; // Реверс
+        }
+
+        private void GoTrain_Button_Click(object sender, EventArgs e)
+        {
+            using (Train train = new Train())
+            {
+                train.ShowDialog();
+            }
         }
     }
 }
