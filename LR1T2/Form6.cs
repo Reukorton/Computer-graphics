@@ -231,6 +231,7 @@ namespace LR1T2
             comboBoxFigure.Items.Add("Вариант 1 — Тетраэдр");
             comboBoxFigure.Items.Add("Вариант 2 — Шестигранник из треугольников");
             comboBoxFigure.Items.Add("Вариант 10 — поверхность (Байдин)");
+            comboBoxFigure.Items.Add("Вариант 3 — поверхность (Миронов)");
             comboBoxFigure.SelectedIndex = 0;
 
             comboBoxAction.Items.Clear();
@@ -347,9 +348,23 @@ namespace LR1T2
         /// <param name="x">Координата X.</param>
         /// <param name="y">Координата Y.</param>
         /// <returns>Координата Z.</returns>
-        private double GetSurfaceZ(double x, double y)
+        private double GetSurfaceZVariant10(double x, double y)
         {
             return Math.Exp(Math.Sin(x) + y * y);
+        }
+
+        /// <summary>
+        /// Вычисляет значение функции индивидуального задания.
+        /// Вариант 3: z = (sin(x) + cos(y))^2.
+        /// </summary>
+        /// <param name="x">Координата X.</param>
+        /// <param name="y">Координата Y.</param>
+        /// <returns>Координата Z.</returns>
+        private double GetSurfaceZVariant3(double x, double y)
+        {
+            double value = Math.Sin(x) + Math.Cos(y);
+
+            return value * value;
         }
 
         #endregion
@@ -371,7 +386,11 @@ namespace LR1T2
 
             if (comboBoxFigure.SelectedIndex == 2)
             {
-                DrawSurface(g);
+                DrawSurfaceVariant10(g);
+            }
+            else if (comboBoxFigure.SelectedIndex == 3)
+            {
+                DrawSurfaceVariant3(g);
             }
             else
             {
@@ -430,13 +449,14 @@ namespace LR1T2
             }
         }
 
+
         /// <summary>
-        /// Рисует график аналитической поверхности z = e^(sin(x) + y^2)
-        /// в диапазонах x ∈ [-3; 3], y ∈ [-3; 3].
+        /// Рисует график аналитической поверхности варианта 10:
+        /// z = e^(sin(x) + y^2), x ∈ [-3; 3], y ∈ [-3; 3].
         /// Поверхность отображается в виде каркасной сетки.
         /// </summary>
         /// <param name="g">Графический контекст.</param>
-        private void DrawSurface(Graphics g)
+        private void DrawSurfaceVariant10(Graphics g)
         {
             double min = -3;
             double max = 3;
@@ -447,11 +467,11 @@ namespace LR1T2
             {
                 for (double y = min; y <= max; y += step)
                 {
-                    PointF previousPoint = ProjectSurfacePoint(min, y, zScale);
+                    PointF previousPoint = ProjectSurfacePointVariant10(min, y, zScale);
 
                     for (double x = min + step; x <= max; x += step)
                     {
-                        PointF currentPoint = ProjectSurfacePoint(x, y, zScale);
+                        PointF currentPoint = ProjectSurfacePointVariant10(x, y, zScale);
 
                         g.DrawLine(pen, previousPoint, currentPoint);
 
@@ -461,11 +481,56 @@ namespace LR1T2
 
                 for (double x = min; x <= max; x += step)
                 {
-                    PointF previousPoint = ProjectSurfacePoint(x, min, zScale);
+                    PointF previousPoint = ProjectSurfacePointVariant10(x, min, zScale);
 
                     for (double y = min + step; y <= max; y += step)
                     {
-                        PointF currentPoint = ProjectSurfacePoint(x, y, zScale);
+                        PointF currentPoint = ProjectSurfacePointVariant10(x, y, zScale);
+
+                        g.DrawLine(pen, previousPoint, currentPoint);
+
+                        previousPoint = currentPoint;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Рисует график аналитической поверхности варианта 3:
+        /// z = (sin(x) + cos(y))^2, x ∈ [-3; 3], y ∈ [-3; 3].
+        /// Поверхность отображается в виде каркасной сетки.
+        /// </summary>
+        /// <param name="g">Графический контекст.</param>
+        private void DrawSurfaceVariant3(Graphics g)
+        {
+            double min = -3;
+            double max = 3;
+            double step = 0.3;
+            double zScale = 0.7;
+
+            using (Pen pen = CreateFigurePen())
+            {
+                for (double y = min; y <= max; y += step)
+                {
+                    PointF previousPoint = ProjectSurfacePointVariant3(min, y, zScale);
+
+                    for (double x = min + step; x <= max; x += step)
+                    {
+                        PointF currentPoint = ProjectSurfacePointVariant3(x, y, zScale);
+
+                        g.DrawLine(pen, previousPoint, currentPoint);
+
+                        previousPoint = currentPoint;
+                    }
+                }
+
+                for (double x = min; x <= max; x += step)
+                {
+                    PointF previousPoint = ProjectSurfacePointVariant3(x, min, zScale);
+
+                    for (double y = min + step; y <= max; y += step)
+                    {
+                        PointF currentPoint = ProjectSurfacePointVariant3(x, y, zScale);
 
                         g.DrawLine(pen, previousPoint, currentPoint);
 
@@ -579,15 +644,33 @@ namespace LR1T2
         }
 
         /// <summary>
-        /// Вычисляет точку аналитической поверхности и переводит ее в экранные координаты.
+        /// Вычисляет точку аналитической поверхности варианта 10
+        /// и переводит ее в экранные координаты.
         /// </summary>
         /// <param name="x">Координата X.</param>
         /// <param name="y">Координата Y.</param>
         /// <param name="zScale">Коэффициент уменьшения высоты поверхности.</param>
         /// <returns>Точка на плоскости экрана.</returns>
-        private PointF ProjectSurfacePoint(double x, double y, double zScale)
+        private PointF ProjectSurfacePointVariant10(double x, double y, double zScale)
         {
-            double z = GetSurfaceZ(x, y) * zScale;
+            double z = GetSurfaceZVariant10(x, y) * zScale;
+
+            Point3D point = new Point3D(x, z, y);
+
+            return ProjectPoint(point);
+        }
+
+        /// <summary>
+        /// Вычисляет точку аналитической поверхности варианта 3
+        /// и переводит ее в экранные координаты.
+        /// </summary>
+        /// <param name="x">Координата X.</param>
+        /// <param name="y">Координата Y.</param>
+        /// <param name="zScale">Коэффициент изменения высоты поверхности.</param>
+        /// <returns>Точка на плоскости экрана.</returns>
+        private PointF ProjectSurfacePointVariant3(double x, double y, double zScale)
+        {
+            double z = GetSurfaceZVariant3(x, y) * zScale;
 
             Point3D point = new Point3D(x, z, y);
 
