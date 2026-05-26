@@ -230,6 +230,7 @@ namespace LR1T2
             comboBoxFigure.Items.Clear();
             comboBoxFigure.Items.Add("Вариант 1 — Тетраэдр");
             comboBoxFigure.Items.Add("Вариант 2 — Шестигранник из треугольников");
+            comboBoxFigure.Items.Add("Вариант 10 — поверхность (Байдин)");
             comboBoxFigure.SelectedIndex = 0;
 
             comboBoxAction.Items.Clear();
@@ -271,7 +272,8 @@ namespace LR1T2
             {
                 CreateTetrahedron();
             }
-            else
+
+            if (comboBoxFigure.SelectedIndex == 1)
             {
                 CreateTriangleHexahedron();
             }
@@ -336,6 +338,22 @@ namespace LR1T2
 
         #endregion
 
+        #region Аналитическая поверхность
+
+        /// <summary>
+        /// Вычисляет значение функции индивидуального задания.
+        /// Вариант 10: z = e^(sin(x) + y^2).
+        /// </summary>
+        /// <param name="x">Координата X.</param>
+        /// <param name="y">Координата Y.</param>
+        /// <returns>Координата Z.</returns>
+        private double GetSurfaceZ(double x, double y)
+        {
+            return Math.Exp(Math.Sin(x) + y * y);
+        }
+
+        #endregion
+
         #region Рисование
 
         /// <summary>
@@ -350,7 +368,15 @@ namespace LR1T2
             g.Clear(Color.White);
 
             DrawCoordinateSystem(g);
-            DrawPolyhedron(g);
+
+            if (comboBoxFigure.SelectedIndex == 2)
+            {
+                DrawSurface(g);
+            }
+            else
+            {
+                DrawPolyhedron(g);
+            }
         }
 
         /// <summary>
@@ -400,6 +426,51 @@ namespace LR1T2
                     int b = edges[i, 1];
 
                     g.DrawLine(pen, points[a], points[b]);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Рисует график аналитической поверхности z = e^(sin(x) + y^2)
+        /// в диапазонах x ∈ [-3; 3], y ∈ [-3; 3].
+        /// Поверхность отображается в виде каркасной сетки.
+        /// </summary>
+        /// <param name="g">Графический контекст.</param>
+        private void DrawSurface(Graphics g)
+        {
+            double min = -3;
+            double max = 3;
+            double step = 0.3;
+            double zScale = 0.02;
+
+            using (Pen pen = CreateFigurePen())
+            {
+                for (double y = min; y <= max; y += step)
+                {
+                    PointF previousPoint = ProjectSurfacePoint(min, y, zScale);
+
+                    for (double x = min + step; x <= max; x += step)
+                    {
+                        PointF currentPoint = ProjectSurfacePoint(x, y, zScale);
+
+                        g.DrawLine(pen, previousPoint, currentPoint);
+
+                        previousPoint = currentPoint;
+                    }
+                }
+
+                for (double x = min; x <= max; x += step)
+                {
+                    PointF previousPoint = ProjectSurfacePoint(x, min, zScale);
+
+                    for (double y = min + step; y <= max; y += step)
+                    {
+                        PointF currentPoint = ProjectSurfacePoint(x, y, zScale);
+
+                        g.DrawLine(pen, previousPoint, currentPoint);
+
+                        previousPoint = currentPoint;
+                    }
                 }
             }
         }
@@ -505,6 +576,22 @@ namespace LR1T2
             float screenY = (float)(centerY - viewed.Y * screenScale);
 
             return new PointF(screenX, screenY);
+        }
+
+        /// <summary>
+        /// Вычисляет точку аналитической поверхности и переводит ее в экранные координаты.
+        /// </summary>
+        /// <param name="x">Координата X.</param>
+        /// <param name="y">Координата Y.</param>
+        /// <param name="zScale">Коэффициент уменьшения высоты поверхности.</param>
+        /// <returns>Точка на плоскости экрана.</returns>
+        private PointF ProjectSurfacePoint(double x, double y, double zScale)
+        {
+            double z = GetSurfaceZ(x, y) * zScale;
+
+            Point3D point = new Point3D(x, z, y);
+
+            return ProjectPoint(point);
         }
 
         /// <summary>
