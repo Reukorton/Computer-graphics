@@ -52,6 +52,30 @@ namespace LR1T2
 
         #endregion
 
+        #region Поля настройки линии
+
+        /// <summary>
+        /// Цвет линии многогранника.
+        /// </summary>
+        private Color figureLineColor = Color.Black;
+
+        /// <summary>
+        /// Толщина линии многогранника.
+        /// </summary>
+        private float figureLineWidth = 2;
+
+        /// <summary>
+        /// Стиль линии многогранника.
+        /// </summary>
+        private DashStyle figureLineStyle = DashStyle.Solid;
+
+        /// <summary>
+        /// Шаг пунктира для пунктирной линии.
+        /// </summary>
+        private float dashStep = 4;
+
+        #endregion
+
         #region Поля фигуры
 
         /// <summary>
@@ -188,23 +212,34 @@ namespace LR1T2
 
         /// <summary>
         /// Инициализирует форму лабораторной работы №4.
-        /// Заполняет элементы управления, подключает обработчики событий
-        /// и создает начальную фигуру.
         /// </summary>
         public Form6()
         {
             InitializeComponent();
 
+            InitializeComboBoxes();
+
+            CreateTetrahedron();
+        }
+
+        /// <summary>
+        /// Заполняет выпадающие списки начальными значениями.
+        /// </summary>
+        private void InitializeComboBoxes()
+        {
+            comboBoxFigure.Items.Clear();
             comboBoxFigure.Items.Add("Вариант 1 — Тетраэдр");
             comboBoxFigure.Items.Add("Вариант 2 — Шестигранник из треугольников");
             comboBoxFigure.SelectedIndex = 0;
 
+            comboBoxAction.Items.Clear();
             comboBoxAction.Items.Add("Перемещение");
             comboBoxAction.Items.Add("Масштабирование");
             comboBoxAction.Items.Add("Вращение");
             comboBoxAction.Items.Add("Отражение");
             comboBoxAction.SelectedIndex = 0;
 
+            comboBoxAxis.Items.Clear();
             comboBoxAxis.Items.Add("X");
             comboBoxAxis.Items.Add("Y");
             comboBoxAxis.Items.Add("Z");
@@ -214,24 +249,10 @@ namespace LR1T2
             comboBoxAxis.Items.Add("XYZ");
             comboBoxAxis.SelectedIndex = 0;
 
-            comboBoxFigure.SelectedIndexChanged += ComboBoxFigure_SelectedIndexChanged;
-
-            pictureBox1.Paint += PictureBox1_Paint;
-
-            btnMinus.Click += BtnMinus_Click;
-            btnPlus.Click += BtnPlus_Click;
-
-            btnAutoRotate.Click += BtnAutoRotate_Click;
-            btnAutoMove.Click += BtnAutoMove_Click;
-            btnDirection.Click += BtnDirection_Click;
-            btnSpeedMinus.Click += BtnSpeedMinus_Click;
-            btnSpeedPlus.Click += BtnSpeedPlus_Click;
-            btnReset.Click += BtnReset_Click;
-
-            timer1.Interval = 30;
-            timer1.Tick += Timer_Tick;
-
-            CreateTetrahedron();
+            comboBoxLineStyle.Items.Clear();
+            comboBoxLineStyle.Items.Add("Сплошная");
+            comboBoxLineStyle.Items.Add("Пунктирная");
+            comboBoxLineStyle.SelectedIndex = 0;
         }
 
         #endregion
@@ -371,7 +392,7 @@ namespace LR1T2
                 points[i] = ProjectPoint(vertices[i]);
             }
 
-            using (Pen pen = new Pen(Color.Black, 2))
+            using (Pen pen = CreateFigurePen())
             {
                 for (int i = 0; i < edges.GetLength(0); i++)
                 {
@@ -381,6 +402,86 @@ namespace LR1T2
                     g.DrawLine(pen, points[a], points[b]);
                 }
             }
+        }
+
+        /// <summary>
+        /// Создает перо для рисования ребер многогранника
+        /// с учетом выбранного цвета, толщины и стиля линии.
+        /// </summary>
+        /// <returns>Перо для рисования многогранника.</returns>
+        private Pen CreateFigurePen()
+        {
+            Pen pen = new Pen(figureLineColor, figureLineWidth);
+
+            if (figureLineStyle == DashStyle.Dash)
+            {
+                pen.DashPattern = new float[] { dashStep, dashStep };
+            }
+            else
+            {
+                pen.DashStyle = DashStyle.Solid;
+            }
+
+            return pen;
+        }
+
+        #endregion
+
+        #region Настройка линии
+
+        /// <summary>
+        /// Открывает выбор цвета линии многогранника.
+        /// </summary>
+        /// <param name="sender">Источник события.</param>
+        /// <param name="e">Аргументы события.</param>
+        private void BtnLineColor_Click(object sender, EventArgs e)
+        {
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                figureLineColor = colorDialog1.Color;
+                pictureBox1.Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// Изменяет толщину линии многогранника.
+        /// </summary>
+        /// <param name="sender">Источник события.</param>
+        /// <param name="e">Аргументы события.</param>
+        private void NumericLineWidth_ValueChanged(object sender, EventArgs e)
+        {
+            figureLineWidth = (float)numericLineWidth.Value;
+            pictureBox1.Invalidate();
+        }
+
+        /// <summary>
+        /// Изменяет стиль линии многогранника.
+        /// </summary>
+        /// <param name="sender">Источник события.</param>
+        /// <param name="e">Аргументы события.</param>
+        private void ComboBoxLineStyle_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBoxLineStyle.SelectedIndex == 0)
+            {
+                figureLineStyle = DashStyle.Solid;
+            }
+            else
+            {
+                figureLineStyle = DashStyle.Dash;
+            }
+
+            pictureBox1.Invalidate();
+        }
+
+        /// <summary>
+        /// Изменяет шаг пунктирной линии.
+        /// </summary>
+        /// <param name="sender">Источник события.</param>
+        /// <param name="e">Аргументы события.</param>
+        private void NumericDashStep_ValueChanged(object sender, EventArgs e)
+        {
+            dashStep = (float)numericDashStep.Value;
+            pictureBox1.Invalidate();
         }
 
         #endregion
