@@ -49,11 +49,12 @@ namespace LR1T2
 
         private void LabWork4_Button_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(
-                "Нет тут пока ничего. Надеемся, что хотя бы в этом семестре добавим.",
-                "Отсутствует",
-                MessageBoxButtons.OK
-                );
+            using (Form6 form6 = new Form6())
+            {
+                this.Hide();
+                form6.ShowDialog();
+                this.Show();
+            }
         }
     }
 }
