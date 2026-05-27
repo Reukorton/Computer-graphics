@@ -51,10 +51,24 @@
             numericDashStep = new NumericUpDown();
             label2 = new Label();
             label1 = new Label();
+            groupBox1 = new GroupBox();
+            btnRotateZ = new Button();
+            btnRotateY = new Button();
+            btnRotateX = new Button();
+            btnApplyScale = new Button();
+            btnApplyMove = new Button();
+            txtScaleZ = new TextBox();
+            txtScaleY = new TextBox();
+            txtScaleX = new TextBox();
+            txtMoveZ = new TextBox();
+            txtMoveY = new TextBox();
+            txtMoveX = new TextBox();
+            btnRotateCustomAxis = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             groupBoxLineSettings.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericLineWidth).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericDashStep).BeginInit();
+            groupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // pictureBox1
@@ -66,12 +80,13 @@
             pictureBox1.Size = new Size(515, 506);
             pictureBox1.TabIndex = 2;
             pictureBox1.TabStop = false;
+            pictureBox1.Click += pictureBox1_Click;
             pictureBox1.Paint += PictureBox1_Paint;
             // 
             // comboBoxFigure
             // 
             comboBoxFigure.FormattingEnabled = true;
-            comboBoxFigure.Location = new Point(536, 12);
+            comboBoxFigure.Location = new Point(536, 9);
             comboBoxFigure.Name = "comboBoxFigure";
             comboBoxFigure.Size = new Size(143, 23);
             comboBoxFigure.TabIndex = 3;
@@ -119,9 +134,9 @@
             // 
             // btnSpeedMinus
             // 
-            btnSpeedMinus.Location = new Point(646, 41);
+            btnSpeedMinus.Location = new Point(685, 12);
             btnSpeedMinus.Name = "btnSpeedMinus";
-            btnSpeedMinus.Size = new Size(90, 23);
+            btnSpeedMinus.Size = new Size(84, 23);
             btnSpeedMinus.TabIndex = 11;
             btnSpeedMinus.Text = "Скорость -";
             btnSpeedMinus.UseVisualStyleBackColor = true;
@@ -129,7 +144,7 @@
             // 
             // btnSpeedPlus
             // 
-            btnSpeedPlus.Location = new Point(649, 70);
+            btnSpeedPlus.Location = new Point(685, 41);
             btnSpeedPlus.Name = "btnSpeedPlus";
             btnSpeedPlus.Size = new Size(90, 23);
             btnSpeedPlus.TabIndex = 12;
@@ -145,24 +160,25 @@
             // comboBoxAction
             // 
             comboBoxAction.FormattingEnabled = true;
-            comboBoxAction.Location = new Point(536, 143);
+            comboBoxAction.Location = new Point(536, 128);
             comboBoxAction.Name = "comboBoxAction";
-            comboBoxAction.Size = new Size(143, 23);
+            comboBoxAction.Size = new Size(107, 23);
             comboBoxAction.TabIndex = 13;
             // 
             // comboBoxAxis
             // 
             comboBoxAxis.FormattingEnabled = true;
-            comboBoxAxis.Location = new Point(536, 230);
+            comboBoxAxis.Location = new Point(654, 128);
             comboBoxAxis.Name = "comboBoxAxis";
-            comboBoxAxis.Size = new Size(121, 23);
+            comboBoxAxis.Size = new Size(115, 23);
             comboBoxAxis.TabIndex = 14;
+            comboBoxAxis.SelectedIndexChanged += comboBoxAxis_SelectedIndexChanged;
             // 
             // btnMinus
             // 
-            btnMinus.Location = new Point(536, 172);
+            btnMinus.Location = new Point(649, 70);
             btnMinus.Name = "btnMinus";
-            btnMinus.Size = new Size(164, 23);
+            btnMinus.Size = new Size(126, 23);
             btnMinus.TabIndex = 16;
             btnMinus.Text = "выполнить в минус";
             btnMinus.UseVisualStyleBackColor = true;
@@ -170,9 +186,9 @@
             // 
             // btnPlus
             // 
-            btnPlus.Location = new Point(536, 201);
+            btnPlus.Location = new Point(649, 99);
             btnPlus.Name = "btnPlus";
-            btnPlus.Size = new Size(164, 23);
+            btnPlus.Size = new Size(126, 23);
             btnPlus.TabIndex = 17;
             btnPlus.Text = "выполнить в плюс";
             btnPlus.UseVisualStyleBackColor = true;
@@ -188,9 +204,9 @@
             groupBoxLineSettings.Controls.Add(numericDashStep);
             groupBoxLineSettings.Controls.Add(label2);
             groupBoxLineSettings.Controls.Add(label1);
-            groupBoxLineSettings.Location = new Point(536, 335);
+            groupBoxLineSettings.Location = new Point(536, 353);
             groupBoxLineSettings.Name = "groupBoxLineSettings";
-            groupBoxLineSettings.Size = new Size(224, 133);
+            groupBoxLineSettings.Size = new Size(224, 129);
             groupBoxLineSettings.TabIndex = 22;
             groupBoxLineSettings.TabStop = false;
             groupBoxLineSettings.Text = "Настройка линии";
@@ -220,7 +236,7 @@
             label3.AutoSize = true;
             label3.Location = new Point(7, 76);
             label3.Name = "label3";
-            label3.Size = new Size(59, 15);
+            label3.Size = new Size(58, 15);
             label3.TabIndex = 7;
             label3.Text = "Толщина";
             // 
@@ -259,15 +275,139 @@
             label1.AutoSize = true;
             label1.Location = new Point(7, 19);
             label1.Name = "label1";
-            label1.Size = new Size(66, 15);
+            label1.Size = new Size(65, 15);
             label1.TabIndex = 0;
             label1.Text = "Тип линии";
+            // 
+            // groupBox1
+            // 
+            groupBox1.Controls.Add(btnRotateZ);
+            groupBox1.Controls.Add(btnRotateY);
+            groupBox1.Controls.Add(btnRotateX);
+            groupBox1.Controls.Add(btnApplyScale);
+            groupBox1.Controls.Add(btnApplyMove);
+            groupBox1.Controls.Add(txtScaleZ);
+            groupBox1.Controls.Add(txtScaleY);
+            groupBox1.Controls.Add(txtScaleX);
+            groupBox1.Controls.Add(txtMoveZ);
+            groupBox1.Controls.Add(txtMoveY);
+            groupBox1.Controls.Add(txtMoveX);
+            groupBox1.Controls.Add(btnRotateCustomAxis);
+            groupBox1.Location = new Point(536, 157);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(225, 190);
+            groupBox1.TabIndex = 23;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "groupBox1";
+            // 
+            // btnRotateZ
+            // 
+            btnRotateZ.Location = new Point(150, 143);
+            btnRotateZ.Name = "btnRotateZ";
+            btnRotateZ.Size = new Size(75, 23);
+            btnRotateZ.TabIndex = 14;
+            btnRotateZ.Text = "Поворот Z";
+            btnRotateZ.UseVisualStyleBackColor = true;
+            btnRotateZ.Click += btnRotateZ_Click;
+            // 
+            // btnRotateY
+            // 
+            btnRotateY.Location = new Point(71, 167);
+            btnRotateY.Name = "btnRotateY";
+            btnRotateY.Size = new Size(81, 23);
+            btnRotateY.TabIndex = 13;
+            btnRotateY.Text = "Поворот Y";
+            btnRotateY.UseVisualStyleBackColor = true;
+            btnRotateY.Click += btnRotateY_Click;
+            // 
+            // btnRotateX
+            // 
+            btnRotateX.Location = new Point(0, 143);
+            btnRotateX.Name = "btnRotateX";
+            btnRotateX.Size = new Size(75, 23);
+            btnRotateX.TabIndex = 12;
+            btnRotateX.Text = "Поворот Х";
+            btnRotateX.UseVisualStyleBackColor = true;
+            btnRotateX.Click += btnRotateX_Click;
+            // 
+            // btnApplyScale
+            // 
+            btnApplyScale.Location = new Point(0, 85);
+            btnApplyScale.Name = "btnApplyScale";
+            btnApplyScale.Size = new Size(224, 23);
+            btnApplyScale.TabIndex = 11;
+            btnApplyScale.Text = "Масштабирование";
+            btnApplyScale.UseVisualStyleBackColor = true;
+            btnApplyScale.Click += btnApplyScale_Click;
+            // 
+            // btnApplyMove
+            // 
+            btnApplyMove.Location = new Point(0, 27);
+            btnApplyMove.Name = "btnApplyMove";
+            btnApplyMove.Size = new Size(233, 23);
+            btnApplyMove.TabIndex = 10;
+            btnApplyMove.Text = "Перемещение";
+            btnApplyMove.UseVisualStyleBackColor = true;
+            btnApplyMove.Click += btnApplyMove_Click;
+            // 
+            // txtScaleZ
+            // 
+            txtScaleZ.Location = new Point(172, 114);
+            txtScaleZ.Name = "txtScaleZ";
+            txtScaleZ.Size = new Size(47, 23);
+            txtScaleZ.TabIndex = 6;
+            // 
+            // txtScaleY
+            // 
+            txtScaleY.Location = new Point(98, 114);
+            txtScaleY.Name = "txtScaleY";
+            txtScaleY.Size = new Size(44, 23);
+            txtScaleY.TabIndex = 5;
+            // 
+            // txtScaleX
+            // 
+            txtScaleX.Location = new Point(7, 114);
+            txtScaleX.Name = "txtScaleX";
+            txtScaleX.Size = new Size(44, 23);
+            txtScaleX.TabIndex = 4;
+            // 
+            // txtMoveZ
+            // 
+            txtMoveZ.Location = new Point(177, 56);
+            txtMoveZ.Name = "txtMoveZ";
+            txtMoveZ.Size = new Size(47, 23);
+            txtMoveZ.TabIndex = 3;
+            // 
+            // txtMoveY
+            // 
+            txtMoveY.Location = new Point(99, 56);
+            txtMoveY.Name = "txtMoveY";
+            txtMoveY.Size = new Size(43, 23);
+            txtMoveY.TabIndex = 2;
+            // 
+            // txtMoveX
+            // 
+            txtMoveX.Location = new Point(7, 56);
+            txtMoveX.Name = "txtMoveX";
+            txtMoveX.Size = new Size(44, 23);
+            txtMoveX.TabIndex = 1;
+            // 
+            // btnRotateCustomAxis
+            // 
+            btnRotateCustomAxis.Location = new Point(0, 0);
+            btnRotateCustomAxis.Name = "btnRotateCustomAxis";
+            btnRotateCustomAxis.Size = new Size(224, 23);
+            btnRotateCustomAxis.TabIndex = 0;
+            btnRotateCustomAxis.Text = "Поворот вокруг оси 45°";
+            btnRotateCustomAxis.UseVisualStyleBackColor = true;
+            btnRotateCustomAxis.Click += btnRotateCustomAxis_Click;
             // 
             // Form6
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(773, 523);
+            Controls.Add(groupBox1);
             Controls.Add(groupBoxLineSettings);
             Controls.Add(btnPlus);
             Controls.Add(btnMinus);
@@ -288,6 +428,8 @@
             groupBoxLineSettings.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numericLineWidth).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericDashStep).EndInit();
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -317,5 +459,18 @@
         private NumericUpDown numericUpDownDashStep;
         private Label label2;
         private Label label1;
+        private GroupBox groupBox1;
+        private TextBox txtMoveZ;
+        private TextBox txtMoveY;
+        private TextBox txtMoveX;
+        private Button btnRotateCustomAxis;
+        private Button btnApplyScale;
+        private Button btnApplyMove;
+        private TextBox txtScaleZ;
+        private TextBox txtScaleY;
+        private TextBox txtScaleX;
+        private Button btnRotateX;
+        private Button btnRotateZ;
+        private Button btnRotateY;
     }
 }

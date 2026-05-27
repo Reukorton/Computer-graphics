@@ -44,9 +44,9 @@ namespace LR1T2
             /// <param name="z">Координата по оси Z.</param>
             public Point3D(double x, double y, double z)
             {
-                X = x;
-                Y = y;
-                Z = z;
+                this.X = x;
+                this.Y = y;
+                this.Z = z;
             }
         }
 
@@ -229,7 +229,7 @@ namespace LR1T2
         {
             comboBoxFigure.Items.Clear();
             comboBoxFigure.Items.Add("Вариант 1 — Тетраэдр");
-            comboBoxFigure.Items.Add("Вариант 2 — Шестигранник из треугольников");
+            comboBoxFigure.Items.Add("Вариант 2 — Шестигранник из треугольников(Дудник)");
             comboBoxFigure.Items.Add("Вариант 10 — поверхность (Байдин)");
             comboBoxFigure.Items.Add("Вариант 3 — поверхность (Миронов)");
             comboBoxFigure.SelectedIndex = 0;
@@ -1156,5 +1156,188 @@ namespace LR1T2
         }
 
         #endregion
+
+        private void comboBoxAxis_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+        // Описание вершин тетраэдра (4 вершины)
+        private Point3D[] originalVertices = new Point3D[]
+        {
+            new Point3D(0, 100, 0),                               // Верхняя точка на оси Y
+            new Point3D(94.28, -33.33, 0),                        // Передняя правая
+            new Point3D(-47.14, -33.33, 81.65),                   // Левая ближняя
+            new Point3D(-47.14, -33.33, -81.65)                   // Задняя дальняя
+        };
+
+        // Массив измененных вершин после всех трансформаций
+        private Point3D[] transformedVertices = new Point3D[4];
+
+        // Индексы вершин для 4-х треугольных граней. 
+        // ВАЖНО: Обход вершин задан ПРОТИВ часовой стрелки, если смотреть СНАРУЖИ грани!
+        private int[][] faces = new int[][]
+        {
+            new int[] { 0, 2, 1 }, // Грань 1
+            new int[] { 0, 3, 2 }, // Грань 2
+            new int[] { 0, 1, 3 }, // Грань 3
+            new int[] { 1, 2, 3 }  // Основание (Грань 4)
+        };
+        private PointF ProjectToDimetry(Point3D p)
+        {
+            // Стандартные углы для кабинетной/диметрической проекции:
+            double alpha = Math.PI * 7.16 / 180.0;  // 7 градусов 10 минут
+            double beta = Math.PI * 41.42 / 180.0;  // 41 градус 25 минут
+
+            // Расчет экранных координат относительно центра PictureBox
+            double screenX = pictureBox1.Width / 2.0 + (p.X * Math.Cos(alpha) - p.Z * Math.Cos(beta)) * reflectX * scaleX + moveX;
+            double screenY = pictureBox1.Height / 2.0 - (p.Y + p.X * Math.Sin(alpha) + p.Z * Math.Sin(beta)) * reflectY * scaleY + moveY;
+
+            return new PointF((float)screenX, (float)screenY);
+        }
+        private Point3D RotateAroundCustomAxis(Point3D p, double angleDegrees)
+        {
+            double rad = angleDegrees * Math.PI / 180.0;
+            double cos = Math.Cos(rad);
+            double sin = Math.Sin(rad);
+
+            // Направляющие косинусы для оси (1,1,1)
+            double l = 1.0 / Math.Sqrt(3);
+            double m = 1.0 / Math.Sqrt(3);
+            double n = 1.0 / Math.Sqrt(3);
+
+            // Матричное умножение для поворота вокруг произвольной оси
+            double x = (l * l * (1 - cos) + cos) * p.X + (l * m * (1 - cos) - n * sin) * p.Y + (l * n * (1 - cos) + m * sin) * p.Z;
+            double y = (l * m * (1 - cos) + n * sin) * p.X + (m * m * (1 - cos) + cos) * p.Y + (m * n * (1 - cos) - l * sin) * p.Z;
+            double z = (l * n * (1 - cos) - m * sin) * p.X + (m * n * (1 - cos) + l * sin) * p.Y + (n * n * (1 - cos) + cos) * p.Z;
+
+            return new Point3D(x, y, z);
+        }
+        private void btnRotateCustomAxis_Click(object sender, EventArgs e)
+        {
+            // Циклом перезаписываем ОРИГИНАЛЬНЫЕ вершины, поворачивая их в пространстве
+            for (int i = 0; i < originalVertices.Length; i++)
+            {
+                originalVertices[i] = RotateAroundCustomAxis(originalVertices[i], 5); // Поворот на 5 градусов
+            }
+            pictureBox1.Invalidate(); // Перерисовываем экран
+        }
+        private void btnApplyMove_Click(object sender, EventArgs e)
+        {
+            // Безопасно считываем значения из текстовых полей. Если поле пустое, смещение = 0
+            double.TryParse(txtMoveX.Text, out double dx);
+            double.TryParse(txtMoveY.Text, out double dy);
+            double.TryParse(txtMoveZ.Text, out double dz);
+
+            // Изменяем глобальные переменные смещения
+            moveX += dx;
+            moveY += dy;
+            moveZ += dz;
+
+            pictureBox1.Invalidate(); // Перерисовываем
+        }
+        private void btnApplyScale_Click(object sender, EventArgs e)
+        {
+            // Если распарсить не удалось, ставим 1.0 (чтобы объект не сжался в точку)
+            if (!double.TryParse(txtScaleX.Text, out double sx)) sx = 1.0;
+            if (!double.TryParse(txtScaleY.Text, out double sy)) sy = 1.0;
+            if (!double.TryParse(txtScaleZ.Text, out double sz)) sz = 1.0;
+
+            // Умножаем текущие коэффициенты масштаба
+            scaleX *= sx;
+            scaleY *= sy;
+            scaleZ *= sz;
+
+            pictureBox1.Invalidate();
+        }
+        private void btnRotateX_Click(object sender, EventArgs e)
+        {
+            rotateX += 10; // Поворот на 10 градусов вокруг X
+            pictureBox1.Invalidate();
+        }
+
+        private void btnRotateY_Click(object sender, EventArgs e)
+        {
+            rotateY += 10; // Поворот на 10 градусов вокруг Y
+            pictureBox1.Invalidate();
+        }
+
+        private void btnRotateZ_Click(object sender, EventArgs e)
+        {
+            rotateZ += 10; // Поворот на 10 градусов вокруг Z
+            pictureBox1.Invalidate();
+        }
+        private bool IsFaceVisible(Point3D p0, Point3D p1, Point3D p2)
+        {
+            // Векторы двух ребер грани
+            double ax = p1.X - p0.X;
+            double ay = p1.Y - p0.Y;
+            double az = p1.Z - p0.Z;
+
+            double bx = p2.X - p0.X;
+            double by = p2.Y - p0.Y;
+            double bz = p2.Z - p0.Z;
+
+            // Вычисляем только Z-компоненту вектора нормали (Cross Product)
+            double normalZ = ax * by - ay * bx;
+
+            // Если normalZ > 0, грань видима наблюдателю
+            return normalZ > 0;
+        }
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+            // Шаг 1. Переносим текущие координаты с учетом ручных трансформаций (если они есть)
+            for (int i = 0; i < originalVertices.Length; i++)
+            {
+                // Сюда можно также заложить базовое перемещение/масштабирование, если не делать его внутри проекции
+                transformedVertices[i] = originalVertices[i];
+            }
+
+            // Шаг 2. Заводим перья
+            Pen visiblePen = new Pen(Color.Black, 2f);
+            Pen hiddenPen = new Pen(Color.Blue, 1f) { DashPattern = new float[] { 4, 4 } }; // Пунктирная линия 
+
+            // Шаг 3. Определяем видимость граней
+            bool[] isFaceVisible = new bool[faces.Length];
+            for (int i = 0; i < faces.Length; i++)
+            {
+                isFaceVisible[i] = IsFaceVisible(
+                    transformedVertices[faces[i][0]],
+                    transformedVertices[faces[i][1]],
+                    transformedVertices[faces[i][2]]
+                );
+            }
+
+            // Шаг 4. Рисуем систему координат и ось вращения (Задание 2) [cite: 8, 30, 192, 233]
+            // Направляющая линия оси под 45 градусов (проходит из (-200,-200,-200) в (200,200,200))
+            PointF axisStart = ProjectToDimetry(new Point3D(-200, -200, -200));
+            PointF axisEnd = ProjectToDimetry(new Point3D(200, 200, 200));
+            g.DrawLine(new Pen(Color.Red, 1.5f) { DashStyle = System.Drawing.Drawing2D.DashStyle.DashDot }, axisStart, axisEnd);
+
+            // Шаг 5. Отрисовка ребер многогранника
+            // Перебираем все пары вершин, проверяя их смежность с видимыми гранями
+            for (int i = 0; i < faces.Length; i++)
+            {
+                Pen currentPen = isFaceVisible[i] ? visiblePen : hiddenPen;
+
+                for (int j = 0; j < 3; j++)
+                {
+                    Point3D pStart3D = transformedVertices[faces[i][j]];
+                    Point3D pEnd3D = transformedVertices[faces[i][(j + 1) % 3]];
+
+                    PointF pStart2D = ProjectToDimetry(pStart3D);
+                    PointF pEnd2D = ProjectToDimetry(pEnd3D);
+
+                    g.DrawLine(currentPen, pStart2D, pEnd2D);
+                }
+            }
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
+        }
     }
-}
+}   
