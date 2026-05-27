@@ -73,7 +73,7 @@
             comboBoxFigure.FormattingEnabled = true;
             comboBoxFigure.Location = new Point(536, 12);
             comboBoxFigure.Name = "comboBoxFigure";
-            comboBoxFigure.Size = new Size(143, 23);
+            comboBoxFigure.Size = new Size(200, 23);
             comboBoxFigure.TabIndex = 3;
             comboBoxFigure.SelectedIndexChanged += ComboBoxFigure_SelectedIndexChanged;
             // 
@@ -283,6 +283,7 @@
             Controls.Add(pictureBox1);
             Name = "Form6";
             Text = "Form6";
+            Load += Form6_Load;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             groupBoxLineSettings.ResumeLayout(false);
             groupBoxLineSettings.PerformLayout();
