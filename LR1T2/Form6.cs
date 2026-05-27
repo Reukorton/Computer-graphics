@@ -50,6 +50,26 @@ namespace LR1T2
             }
         }
 
+        /// <summary>
+        /// Хранит уравнение одной плоскости для алгоритма удаления невидимых линий Робертса.
+        /// Уравнение плоскости имеет вид A*x + B*y + C*z + D = 0.
+        /// </summary>
+        private struct Plane3D
+        {
+            public double A;
+            public double B;
+            public double C;
+            public double D;
+
+            public Plane3D(double a, double b, double c, double d)
+            {
+                A = a;
+                B = b;
+                C = c;
+                D = d;
+            }
+        }
+
         #endregion
 
         #region Поля настройки линии
@@ -88,6 +108,12 @@ namespace LR1T2
         /// Каждое ребро задается двумя индексами вершин.
         /// </summary>
         private int[,] edges;
+
+        /// <summary>
+        /// Массив граней текущего многогранника.
+        /// Каждая грань хранится как список индексов вершин.
+        /// </summary>
+        private int[][] faces;
 
         #endregion
 
@@ -145,6 +171,11 @@ namespace LR1T2
         private double rotateZ = 0;
 
         /// <summary>
+        /// Угол вращения вокруг оси индивидуального варианта, проходящей через начало координат.
+        /// </summary>
+        private double rotateVariantAxis = 0;
+
+        /// <summary>
         /// Коэффициент масштабирования по оси X.
         /// </summary>
         private double scaleX = 1;
@@ -158,6 +189,12 @@ namespace LR1T2
         /// Коэффициент масштабирования по оси Z.
         /// </summary>
         private double scaleZ = 1;
+
+        /// <summary>
+        /// Минимально допустимый коэффициент масштабирования.
+        /// Не дает модели схлопнуться в точку или отразиться из-за отрицательного масштаба.
+        /// </summary>
+        private const double MinScaleValue = 0.1;
 
         /// <summary>
         /// Коэффициент отражения по оси X.
@@ -232,6 +269,7 @@ namespace LR1T2
             comboBoxFigure.Items.Add("Вариант 2 — Шестигранник из треугольников");
             comboBoxFigure.Items.Add("Вариант 10 — поверхность (Байдин)");
             comboBoxFigure.Items.Add("Вариант 3 — поверхность (Миронов)");
+            comboBoxFigure.Items.Add("Вариант 1 - фигура (Воропаев)");
             comboBoxFigure.SelectedIndex = 0;
 
             comboBoxAction.Items.Clear();
@@ -249,12 +287,41 @@ namespace LR1T2
             comboBoxAxis.Items.Add("XZ");
             comboBoxAxis.Items.Add("YZ");
             comboBoxAxis.Items.Add("XYZ");
+            comboBoxAxis.Items.Add("Ось 45°");
             comboBoxAxis.SelectedIndex = 0;
 
             comboBoxLineStyle.Items.Clear();
             comboBoxLineStyle.Items.Add("Сплошная");
             comboBoxLineStyle.Items.Add("Пунктирная");
             comboBoxLineStyle.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Устанавливает стандартный вид для уже существующих фигур.
+        /// </summary>
+        private void ApplyDefaultView()
+        {
+            viewAngleX = -25;
+            viewAngleY = 35;
+            screenScale = 100;
+        }
+
+        /// <summary>
+        /// Устанавливает диметрический вид для таблицы 3, варианта 1.
+        /// </summary>
+        private void ApplyDimetricView()
+        {
+            viewAngleX = -20;
+            viewAngleY = 45;
+            screenScale = 95;
+        }
+
+        /// <summary>
+        /// Проверяет, выбран ли вариант 1 из таблицы 3.
+        /// </summary>
+        private bool IsVoropaevVariantSelected()
+        {
+            return comboBoxFigure.SelectedIndex == 4;
         }
 
         #endregion
@@ -279,8 +346,64 @@ namespace LR1T2
                 CreateTriangleHexahedron();
             }
 
+            if (comboBoxFigure.SelectedIndex == 2 || comboBoxFigure.SelectedIndex == 3)
+            {
+                ApplyDefaultView();
+            }
+
+            if (comboBoxFigure.SelectedIndex == 4)
+            {
+                CreateOctahedron();
+            }
+
             ResetTransformations();
             pictureBox1.Invalidate();
+        }
+
+        /// <summary>
+        /// Создает октаэдр для таблицы 3, варианта 1.
+        /// </summary>
+        private void CreateOctahedron()
+        {
+            ApplyDimetricView();
+
+            vertices = new Point3D[]
+            {
+                new Point3D(0, 1.2, 0),
+                new Point3D(0, -1.2, 0),
+                new Point3D(1.2, 0, 0),
+                new Point3D(-1.2, 0, 0),
+                new Point3D(0, 0, 1.2),
+                new Point3D(0, 0, -1.2)
+            };
+
+            edges = new int[,]
+            {
+                { 0, 2 },
+                { 0, 4 },
+                { 0, 3 },
+                { 0, 5 },
+                { 1, 2 },
+                { 1, 4 },
+                { 1, 3 },
+                { 1, 5 },
+                { 2, 4 },
+                { 4, 3 },
+                { 3, 5 },
+                { 5, 2 }
+            };
+
+            faces = new int[][]
+            {
+                new int[] { 0, 2, 4 },
+                new int[] { 0, 4, 3 },
+                new int[] { 0, 3, 5 },
+                new int[] { 0, 5, 2 },
+                new int[] { 1, 4, 2 },
+                new int[] { 1, 3, 4 },
+                new int[] { 1, 5, 3 },
+                new int[] { 1, 2, 5 }
+            };
         }
 
         /// <summary>
@@ -289,6 +412,8 @@ namespace LR1T2
         /// </summary>
         private void CreateTetrahedron()
         {
+            ApplyDefaultView();
+
             vertices = new Point3D[]
             {
                 new Point3D(0, 1.3, 0),
@@ -306,6 +431,14 @@ namespace LR1T2
                 { 2, 3 },
                 { 3, 1 }
             };
+
+            faces = new int[][]
+            {
+                new int[] { 0, 1, 2 },
+                new int[] { 0, 2, 3 },
+                new int[] { 0, 3, 1 },
+                new int[] { 1, 3, 2 }
+            };
         }
 
         /// <summary>
@@ -314,6 +447,8 @@ namespace LR1T2
         /// </summary>
         private void CreateTriangleHexahedron()
         {
+            ApplyDefaultView();
+
             vertices = new Point3D[]
             {
                 new Point3D(0, 1.4, 0),
@@ -334,6 +469,16 @@ namespace LR1T2
                 { 2, 3 },
                 { 3, 4 },
                 { 4, 2 }
+            };
+
+            faces = new int[][]
+            {
+                new int[] { 0, 2, 3 },
+                new int[] { 0, 3, 4 },
+                new int[] { 0, 4, 2 },
+                new int[] { 1, 3, 2 },
+                new int[] { 1, 4, 3 },
+                new int[] { 1, 2, 4 }
             };
         }
 
@@ -383,6 +528,7 @@ namespace LR1T2
             g.Clear(Color.White);
 
             DrawCoordinateSystem(g);
+            DrawIndividualRotationAxis(g);
 
             if (comboBoxFigure.SelectedIndex == 2)
             {
@@ -396,6 +542,8 @@ namespace LR1T2
             {
                 DrawPolyhedron(g);
             }
+
+            DrawWorldCoordinateBounds(g);
         }
 
         /// <summary>
@@ -425,26 +573,85 @@ namespace LR1T2
         }
 
         /// <summary>
+        /// Рисует ось вращения для таблицы 3, варианта 1.
+        /// </summary>
+        /// <param name="g">Графический контекст.</param>
+        private void DrawIndividualRotationAxis(Graphics g)
+        {
+            if (!IsVoropaevVariantSelected())
+            {
+                return;
+            }
+
+            double axisLength = 2.2;
+            PointF startPoint = ProjectAxisPoint(new Point3D(-axisLength, -axisLength, -axisLength));
+            PointF endPoint = ProjectAxisPoint(new Point3D(axisLength, axisLength, axisLength));
+
+            using (Pen pen = new Pen(Color.DarkOrange, 1))
+            using (Font font = new Font("Arial", 9))
+            using (Brush brush = new SolidBrush(Color.DarkOrange))
+            {
+                pen.DashStyle = DashStyle.Dash;
+                g.DrawLine(pen, startPoint, endPoint);
+                g.DrawString("Axis", font, brush, endPoint);
+            }
+        }
+
+        /// <summary>
         /// Рисует текущий многогранник по его вершинам и ребрам.
         /// </summary>
         /// <param name="g">Графический контекст.</param>
         private void DrawPolyhedron(Graphics g)
         {
-            PointF[] points = new PointF[vertices.Length];
+            if (vertices == null || edges == null)
+            {
+                return;
+            }
+
+            PointF[] projectedPoints = new PointF[vertices.Length];
+            Point3D[] viewedPoints = new Point3D[vertices.Length];
 
             for (int i = 0; i < vertices.Length; i++)
             {
-                points[i] = ProjectPoint(vertices[i]);
+                Point3D transformed = TransformPoint(vertices[i]);
+                viewedPoints[i] = ViewPoint(transformed);
+                projectedPoints[i] = ConvertViewedPointToScreen(viewedPoints[i]);
             }
 
-            using (Pen pen = CreateFigurePen())
+            bool[] visibleEdges;
+
+            if (IsVoropaevVariantSelected())
+            {
+                visibleEdges = GetRobertsVisibleEdges(viewedPoints);
+            }
+            else
+            {
+                visibleEdges = GetVisibleEdgesByFaceNormals(viewedPoints);
+            }
+
+            using (Pen hiddenPen = CreateHiddenFigurePen())
+            using (Pen visiblePen = CreateFigurePen())
             {
                 for (int i = 0; i < edges.GetLength(0); i++)
                 {
                     int a = edges[i, 0];
                     int b = edges[i, 1];
 
-                    g.DrawLine(pen, points[a], points[b]);
+                    if (!visibleEdges[i])
+                    {
+                        g.DrawLine(hiddenPen, projectedPoints[a], projectedPoints[b]);
+                    }
+                }
+
+                for (int i = 0; i < edges.GetLength(0); i++)
+                {
+                    int a = edges[i, 0];
+                    int b = edges[i, 1];
+
+                    if (visibleEdges[i])
+                    {
+                        g.DrawLine(visiblePen, projectedPoints[a], projectedPoints[b]);
+                    }
                 }
             }
         }
@@ -561,6 +768,159 @@ namespace LR1T2
             return pen;
         }
 
+        /// <summary>
+        /// Создает пунктирное перо для скрытых ребер.
+        /// </summary>
+        /// <returns>Пунктирное перо для скрытых ребер.</returns>
+        private Pen CreateHiddenFigurePen()
+        {
+            Pen pen = new Pen(figureLineColor, figureLineWidth);
+            pen.DashPattern = new float[] { dashStep, dashStep };
+
+            return pen;
+        }
+
+        /// <summary>
+        /// Рисует текущие минимальные и максимальные значения мировых координат.
+        /// </summary>
+        /// <param name="g">Графический контекст.</param>
+        private void DrawWorldCoordinateBounds(Graphics g)
+        {
+            string text = GetWorldCoordinateBoundsText();
+
+            if (String.IsNullOrEmpty(text))
+            {
+                return;
+            }
+
+            using (Font font = new Font("Arial", 9))
+            using (Brush brush = new SolidBrush(Color.Black))
+            {
+                g.DrawString(text, font, brush, 10, 10);
+            }
+        }
+
+        /// <summary>
+        /// Формирует текст с текущими минимальными и максимальными значениями мировых координат.
+        /// </summary>
+        /// <returns>Текст с границами координат.</returns>
+        private string GetWorldCoordinateBoundsText()
+        {
+            if (comboBoxFigure.SelectedIndex == 2)
+            {
+                return GetSurfaceBoundsText(-3, 3, 0.3, 0.02, true);
+            }
+
+            if (comboBoxFigure.SelectedIndex == 3)
+            {
+                return GetSurfaceBoundsText(-3, 3, 0.3, 0.7, false);
+            }
+
+            if (vertices == null || vertices.Length == 0)
+            {
+                return String.Empty;
+            }
+
+            Point3D firstPoint = TransformPoint(vertices[0]);
+
+            double minX = firstPoint.X;
+            double maxX = firstPoint.X;
+            double minY = firstPoint.Y;
+            double maxY = firstPoint.Y;
+            double minZ = firstPoint.Z;
+            double maxZ = firstPoint.Z;
+
+            for (int i = 1; i < vertices.Length; i++)
+            {
+                Point3D point = TransformPoint(vertices[i]);
+
+                UpdateBounds(point, ref minX, ref maxX, ref minY, ref maxY, ref minZ, ref maxZ);
+            }
+
+            return FormatBoundsText(minX, maxX, minY, maxY, minZ, maxZ);
+        }
+
+        /// <summary>
+        /// Формирует текст с границами координат для аналитической поверхности, построенной по сетке точек.
+        /// </summary>
+        /// <param name="min">Минимальное значение аргумента.</param>
+        /// <param name="max">Максимальное значение аргумента.</param>
+        /// <param name="step">Шаг построения сетки.</param>
+        /// <param name="zScale">Коэффициент масштабирования высоты при рисовании.</param>
+        /// <param name="isVariant10">Значение true используется для варианта 10, false — для варианта 3.</param>
+        /// <returns>Текст с границами координат.</returns>
+        private string GetSurfaceBoundsText(double min, double max, double step, double zScale, bool isVariant10)
+        {
+            bool hasPoint = false;
+            double minX = 0;
+            double maxX = 0;
+            double minY = 0;
+            double maxY = 0;
+            double minZ = 0;
+            double maxZ = 0;
+
+            for (double y = min; y <= max; y += step)
+            {
+                for (double x = min; x <= max; x += step)
+                {
+                    double surfaceZ = isVariant10 ? GetSurfaceZVariant10(x, y) : GetSurfaceZVariant3(x, y);
+                    Point3D point = TransformPoint(new Point3D(x, surfaceZ * zScale, y));
+
+                    if (!hasPoint)
+                    {
+                        minX = point.X;
+                        maxX = point.X;
+                        minY = point.Y;
+                        maxY = point.Y;
+                        minZ = point.Z;
+                        maxZ = point.Z;
+                        hasPoint = true;
+                    }
+                    else
+                    {
+                        UpdateBounds(point, ref minX, ref maxX, ref minY, ref maxY, ref minZ, ref maxZ);
+                    }
+                }
+            }
+
+            return FormatBoundsText(minX, maxX, minY, maxY, minZ, maxZ);
+        }
+
+        /// <summary>
+        /// Обновляет границы координат с учетом заданной точки.
+        /// </summary>
+        private void UpdateBounds(
+            Point3D point,
+            ref double minX,
+            ref double maxX,
+            ref double minY,
+            ref double maxY,
+            ref double minZ,
+            ref double maxZ)
+        {
+            minX = Math.Min(minX, point.X);
+            maxX = Math.Max(maxX, point.X);
+            minY = Math.Min(minY, point.Y);
+            maxY = Math.Max(maxY, point.Y);
+            minZ = Math.Min(minZ, point.Z);
+            maxZ = Math.Max(maxZ, point.Z);
+        }
+
+        /// <summary>
+        /// Форматирует текст с границами координат.
+        /// </summary>
+        private string FormatBoundsText(double minX, double maxX, double minY, double maxY, double minZ, double maxZ)
+        {
+            return String.Format(
+                "Min X: {0:F2}   Max X: {1:F2}\nMin Y: {2:F2}   Max Y: {3:F2}\nMin Z: {4:F2}   Max Z: {5:F2}",
+                minX,
+                maxX,
+                minY,
+                maxY,
+                minZ,
+                maxZ);
+        }
+
         #endregion
 
         #region Настройка линии
@@ -634,11 +994,21 @@ namespace LR1T2
             Point3D transformed = TransformPoint(point);
             Point3D viewed = ViewPoint(transformed);
 
+            return ConvertViewedPointToScreen(viewed);
+        }
+
+        /// <summary>
+        /// Переводит точку после поворота вида в экранные координаты.
+        /// </summary>
+        /// <param name="point">Точка после поворота вида.</param>
+        /// <returns>Точка в экранных координатах.</returns>
+        private PointF ConvertViewedPointToScreen(Point3D point)
+        {
             int centerX = pictureBox1.Width / 2;
             int centerY = pictureBox1.Height / 2;
 
-            float screenX = (float)(centerX + viewed.X * screenScale);
-            float screenY = (float)(centerY - viewed.Y * screenScale);
+            float screenX = (float)(centerX + point.X * screenScale);
+            float screenY = (float)(centerY - point.Y * screenScale);
 
             return new PointF(screenX, screenY);
         }
@@ -687,13 +1057,7 @@ namespace LR1T2
         {
             Point3D viewed = ViewPoint(point);
 
-            int centerX = pictureBox1.Width / 2;
-            int centerY = pictureBox1.Height / 2;
-
-            float screenX = (float)(centerX + viewed.X * screenScale);
-            float screenY = (float)(centerY - viewed.Y * screenScale);
-
-            return new PointF(screenX, screenY);
+            return ConvertViewedPointToScreen(viewed);
         }
 
         /// <summary>
@@ -711,6 +1075,7 @@ namespace LR1T2
             result = MultiplyPointByMatrix(result, GetRotationXMatrix(rotateX));
             result = MultiplyPointByMatrix(result, GetRotationYMatrix(rotateY));
             result = MultiplyPointByMatrix(result, GetRotationZMatrix(rotateZ));
+            result = MultiplyPointByMatrix(result, GetAxisRotationMatrix(rotateVariantAxis, 1, 1, 1));
             result = MultiplyPointByMatrix(result, GetTranslationMatrix(moveX, moveY, moveZ));
 
             return result;
@@ -755,6 +1120,291 @@ namespace LR1T2
                        matrix[3, 2];
 
             return new Point3D(x, y, z);
+        }
+
+        #endregion
+
+        #region Определение скрытых ребер
+
+        /// <summary>
+        /// Определяет видимые ребра с помощью алгоритма удаления невидимых линий Робертса.
+        /// Эта реализация используется для таблицы 3, варианта 1.
+        /// Выпуклое тело представляется набором плоскостей граней с нормалями, направленными внутрь.
+        /// Грань считается видимой, если наблюдатель находится с внешней стороны соответствующей полуплоскости.
+        /// Ребро считается видимым, если оно принадлежит хотя бы одной видимой грани.
+        /// </summary>
+        private bool[] GetRobertsVisibleEdges(Point3D[] viewedPoints)
+        {
+            bool[] visibleEdges = new bool[edges.GetLength(0)];
+
+            if (faces == null || faces.Length == 0)
+            {
+                for (int i = 0; i < visibleEdges.Length; i++)
+                {
+                    visibleEdges[i] = true;
+                }
+
+                return visibleEdges;
+            }
+
+            Plane3D[] bodyPlanes = GetRobertsBodyPlanes(viewedPoints);
+            Point3D bodyCenter = GetObjectCenter(viewedPoints);
+            Point3D observer = new Point3D(bodyCenter.X, bodyCenter.Y, bodyCenter.Z + 1000);
+            bool[] visibleFaces = new bool[faces.Length];
+
+            for (int i = 0; i < bodyPlanes.Length; i++)
+            {
+                visibleFaces[i] = EvaluatePlane(bodyPlanes[i], observer) < 0;
+            }
+
+            for (int edgeIndex = 0; edgeIndex < edges.GetLength(0); edgeIndex++)
+            {
+                int firstVertex = edges[edgeIndex, 0];
+                int secondVertex = edges[edgeIndex, 1];
+
+                for (int faceIndex = 0; faceIndex < faces.Length; faceIndex++)
+                {
+                    if (visibleFaces[faceIndex] && FaceContainsEdge(faces[faceIndex], firstVertex, secondVertex))
+                    {
+                        visibleEdges[edgeIndex] = true;
+                        break;
+                    }
+                }
+            }
+
+            return visibleEdges;
+        }
+
+        /// <summary>
+        /// Формирует матрицу тела, используемую в алгоритме Робертса.
+        /// Каждый элемент массива хранит одну плоскость грани с нормалью, направленной внутрь тела.
+        /// </summary>
+        private Plane3D[] GetRobertsBodyPlanes(Point3D[] viewedPoints)
+        {
+            Plane3D[] planes = new Plane3D[faces.Length];
+            Point3D bodyCenter = GetObjectCenter(viewedPoints);
+
+            for (int i = 0; i < faces.Length; i++)
+            {
+                planes[i] = GetRobertsInwardPlane(viewedPoints, faces[i], bodyCenter);
+            }
+
+            return planes;
+        }
+
+        /// <summary>
+        /// Создает плоскость грани и ориентирует ее так, чтобы внутренние точки тела давали положительное значение.
+        /// </summary>
+        private Plane3D GetRobertsInwardPlane(Point3D[] points, int[] face, Point3D bodyCenter)
+        {
+            Point3D p0 = points[face[0]];
+            Point3D p1 = points[face[1]];
+            Point3D p2 = points[face[2]];
+
+            Point3D firstVector = SubtractPoints(p1, p0);
+            Point3D secondVector = SubtractPoints(p2, p0);
+            Point3D normal = CrossProduct(firstVector, secondVector);
+
+            double a = normal.X;
+            double b = normal.Y;
+            double c = normal.Z;
+            double d = -(a * p0.X + b * p0.Y + c * p0.Z);
+
+            Plane3D plane = new Plane3D(a, b, c, d);
+
+            if (EvaluatePlane(plane, bodyCenter) < 0)
+            {
+                plane = new Plane3D(-plane.A, -plane.B, -plane.C, -plane.D);
+            }
+
+            return plane;
+        }
+
+        /// <summary>
+        /// Подставляет точку в уравнение плоскости A*x + B*y + C*z + D.
+        /// </summary>
+        private double EvaluatePlane(Plane3D plane, Point3D point)
+        {
+            return plane.A * point.X + plane.B * point.Y + plane.C * point.Z + plane.D;
+        }
+
+        /// <summary>
+        /// Определяет видимые ребра методом нормалей, который используется для старых фигур.
+        /// </summary>
+        private bool[] GetVisibleEdgesByFaceNormals(Point3D[] viewedPoints)
+        {
+            bool[] visibleEdges = new bool[edges.GetLength(0)];
+            bool[] visibleFaces = GetVisibleFaces(viewedPoints);
+
+            for (int i = 0; i < edges.GetLength(0); i++)
+            {
+                int firstVertex = edges[i, 0];
+                int secondVertex = edges[i, 1];
+
+                visibleEdges[i] = IsEdgeVisible(firstVertex, secondVertex, visibleFaces);
+            }
+
+            return visibleEdges;
+        }
+
+        /// <summary>
+        /// Определяет видимость всех граней в координатах вида.
+        /// </summary>
+        /// <param name="viewedPoints">Вершины после всех преобразований модели и поворота вида.</param>
+        /// <returns>Логический массив значений видимости граней.</returns>
+        private bool[] GetVisibleFaces(Point3D[] viewedPoints)
+        {
+            if (faces == null || faces.Length == 0)
+            {
+                return new bool[0];
+            }
+
+            Point3D center = GetObjectCenter(viewedPoints);
+            bool[] visibleFaces = new bool[faces.Length];
+
+            for (int i = 0; i < faces.Length; i++)
+            {
+                Point3D normal = GetOutwardFaceNormal(viewedPoints, faces[i], center);
+                visibleFaces[i] = normal.Z > 0;
+            }
+
+            return visibleFaces;
+        }
+
+        /// <summary>
+        /// Вычисляет центр преобразованного объекта.
+        /// </summary>
+        private Point3D GetObjectCenter(Point3D[] points)
+        {
+            double x = 0;
+            double y = 0;
+            double z = 0;
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                x += points[i].X;
+                y += points[i].Y;
+                z += points[i].Z;
+            }
+
+            return new Point3D(x / points.Length, y / points.Length, z / points.Length);
+        }
+
+        /// <summary>
+        /// Вычисляет внешнюю нормаль грани.
+        /// Порядок вершин грани может быть произвольным, потому что направление нормали исправляется по центру объекта.
+        /// </summary>
+        private Point3D GetOutwardFaceNormal(Point3D[] points, int[] face, Point3D objectCenter)
+        {
+            Point3D a = points[face[0]];
+            Point3D b = points[face[1]];
+            Point3D c = points[face[2]];
+
+            Point3D ab = SubtractPoints(b, a);
+            Point3D ac = SubtractPoints(c, a);
+            Point3D normal = CrossProduct(ab, ac);
+
+            Point3D faceCenter = GetFaceCenter(points, face);
+            Point3D centerToFace = SubtractPoints(faceCenter, objectCenter);
+
+            if (DotProduct(normal, centerToFace) < 0)
+            {
+                normal = new Point3D(-normal.X, -normal.Y, -normal.Z);
+            }
+
+            return normal;
+        }
+
+        /// <summary>
+        /// Вычисляет центр грани.
+        /// </summary>
+        private Point3D GetFaceCenter(Point3D[] points, int[] face)
+        {
+            double x = 0;
+            double y = 0;
+            double z = 0;
+
+            for (int i = 0; i < face.Length; i++)
+            {
+                Point3D point = points[face[i]];
+                x += point.X;
+                y += point.Y;
+                z += point.Z;
+            }
+
+            return new Point3D(x / face.Length, y / face.Length, z / face.Length);
+        }
+
+        /// <summary>
+        /// Проверяет, принадлежит ли ребро хотя бы одной видимой грани.
+        /// </summary>
+        private bool IsEdgeVisible(int firstVertex, int secondVertex, bool[] visibleFaces)
+        {
+            if (faces == null || visibleFaces == null || visibleFaces.Length == 0)
+            {
+                return true;
+            }
+
+            for (int i = 0; i < faces.Length; i++)
+            {
+                if (visibleFaces[i] && FaceContainsEdge(faces[i], firstVertex, secondVertex))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Проверяет, содержит ли грань указанное ребро.
+        /// </summary>
+        private bool FaceContainsEdge(int[] face, int firstVertex, int secondVertex)
+        {
+            bool hasFirstVertex = false;
+            bool hasSecondVertex = false;
+
+            for (int i = 0; i < face.Length; i++)
+            {
+                if (face[i] == firstVertex)
+                {
+                    hasFirstVertex = true;
+                }
+
+                if (face[i] == secondVertex)
+                {
+                    hasSecondVertex = true;
+                }
+            }
+
+            return hasFirstVertex && hasSecondVertex;
+        }
+
+        /// <summary>
+        /// Вычитает одну трехмерную точку из другой.
+        /// </summary>
+        private Point3D SubtractPoints(Point3D a, Point3D b)
+        {
+            return new Point3D(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        }
+
+        /// <summary>
+        /// Вычисляет векторное произведение двух трехмерных векторов.
+        /// </summary>
+        private Point3D CrossProduct(Point3D a, Point3D b)
+        {
+            return new Point3D(
+                a.Y * b.Z - a.Z * b.Y,
+                a.Z * b.X - a.X * b.Z,
+                a.X * b.Y - a.Y * b.X);
+        }
+
+        /// <summary>
+        /// Вычисляет скалярное произведение двух трехмерных векторов.
+        /// </summary>
+        private double DotProduct(Point3D a, Point3D b)
+        {
+            return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
         }
 
         #endregion
@@ -851,6 +1501,35 @@ namespace LR1T2
             };
         }
 
+        /// <summary>
+        /// Создает матрицу вращения вокруг произвольной оси, проходящей через начало координат.
+        /// </summary>
+        private double[,] GetAxisRotationMatrix(double angle, double axisX, double axisY, double axisZ)
+        {
+            double length = Math.Sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ);
+
+            if (length == 0)
+            {
+                return GetScaleMatrix(1, 1, 1);
+            }
+
+            double x = axisX / length;
+            double y = axisY / length;
+            double z = axisZ / length;
+            double rad = angle * Math.PI / 180.0;
+            double c = Math.Cos(rad);
+            double s = Math.Sin(rad);
+            double t = 1 - c;
+
+            return new double[,]
+            {
+                { t * x * x + c,     t * x * y + s * z, t * x * z - s * y, 0 },
+                { t * x * y - s * z, t * y * y + c,     t * y * z + s * x, 0 },
+                { t * x * z + s * y, t * y * z - s * x, t * z * z + c,     0 },
+                { 0,                 0,                 0,                 1 }
+            };
+        }
+
         #endregion
 
         #region Управление преобразованиями
@@ -943,17 +1622,17 @@ namespace LR1T2
 
             if (axis.Contains("X"))
             {
-                scaleX += value;
+                scaleX = Math.Max(MinScaleValue, scaleX + value);
             }
 
             if (axis.Contains("Y"))
             {
-                scaleY += value;
+                scaleY = Math.Max(MinScaleValue, scaleY + value);
             }
 
             if (axis.Contains("Z"))
             {
-                scaleZ += value;
+                scaleZ = Math.Max(MinScaleValue, scaleZ + value);
             }
         }
 
@@ -965,6 +1644,16 @@ namespace LR1T2
         private void ApplyRotation(string axis, int sign)
         {
             double value = rotateStep * sign;
+
+            if (axis == "Ось 45°")
+            {
+                if (IsVoropaevVariantSelected())
+                {
+                    rotateVariantAxis += value;
+                }
+
+                return;
+            }
 
             if (axis.Contains("X"))
             {
@@ -1101,7 +1790,14 @@ namespace LR1T2
         {
             if (autoRotation)
             {
-                rotateY += rotateStep * direction;
+                if (IsVoropaevVariantSelected())
+                {
+                    rotateVariantAxis += rotateStep * direction;
+                }
+                else
+                {
+                    rotateY += rotateStep * direction;
+                }
             }
 
             if (autoMoving)
@@ -1139,6 +1835,7 @@ namespace LR1T2
             rotateX = 0;
             rotateY = 0;
             rotateZ = 0;
+            rotateVariantAxis = 0;
 
             scaleX = 1;
             scaleY = 1;
@@ -1156,5 +1853,10 @@ namespace LR1T2
         }
 
         #endregion
+
+        private void Form6_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
